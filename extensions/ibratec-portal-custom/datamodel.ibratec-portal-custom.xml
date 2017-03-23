@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
+  <constants>
+    <constant id="PORTAL_USERREQUEST_DETAILS_ZLIST" xsi:type="string" _delta="redefine"><![CDATA[{"col:left":["ref","caller_id","servicesubcategory_id","title","description","solution"],"col:right":["status","priority","start_date","previni_date","prev_date","resolution_date","last_update","agent_id"]}]]></constant>
+  </constants>
+  <classes>
+  </classes>
+  <menus>
+  </menus>
+  <user_rights>
+    <groups>
+    </groups>
+    <profiles>
+    </profiles>
+  </user_rights>
+</itop_design>

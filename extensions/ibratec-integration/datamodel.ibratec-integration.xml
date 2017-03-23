@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
+  <constants>
+  </constants>
+  <classes>
+   <class id="FunctionalCI">
+       <methods>
+        <method id="DisplayBareRelations" _delta="define">
+          <static>false</static>
+          <access>public</access>
+          <type>Overload-cmdbAbstractObject</type>
+          <code><![CDATA[       public function DisplayBareRelations(WebPage $oPage, $bEditMode = false)
+        {
+                parent::DisplayBareRelations($oPage, $bEditMode);
+                if (!$bEditMode)
+                {
+                       $sStatus = $this->Get('status');
+                       $sName = $this->Get('name');
+                       if ($sStatus == 'production')
+                       {
+                               $oPage->SetCurrentTab(Dict::S('Nagios'));
+                               $oPage->add("<iframe width=\"100%\" height=\"600\" src=\"http://nagios.ibratec.local:7080/nagios/cgi-bin/status.cgi?host=$sName\"></iframe>");
+                       }
+
+                        // Check if the server exists in OCSinventory
+                        define('OCS_SERVER', 'vox1');   // Host DB Server
+                        define('OCS_DB_USER', 'root');  // User to connect to the OCS DB Server
+                        define('OCS_DB_PWD', 'ASdk30');         // Password to connect to the OCS DB Server
+                        define('OCS_DB_NAME', 'ocsweb');        // Name of the OCS database
+
+                        $sName = $this->Get('name');
+                        $link = mysql_connect(OCS_SERVER, OCS_DB_USER, OCS_DB_PWD, true );
+                        if (!$link)
+                        {
+                                echo "Could not connect to OCS...";
+                                return;
+                        }
+
+                        if (mysql_select_db(OCS_DB_NAME, $link ))
+                        {
+                                $sSQL = "SELECT ID FROM hardware WHERE NAME = '$sName'";
+                                $result = mysql_query($sSQL, $link);
+
+                                if (!$result)
+                                {
+                                        echo "<p>Could not successfully run query ($sSQL) from DB: " . mysql_error()."</p>\n";
+                                        return;
+                                }
+
+                                if (mysql_num_rows($result) == 0)
+                                {
+                                        return;
+                                }
+
+                                // We're expecting just one row, let's read it
+                                $row = mysql_fetch_assoc($result);
+                                $id = $row["ID"];
+                                $oPage->SetCurrentTab(Dict::S('OCS Inventory'));
+                                $oPage->add("<iframe style=\"border:0;padding:0;margin:0;width:100%;height:500px;overflow:auto\" src=\"http://vox1.ibratec.local/ocsreports/index.php?function=computer&head=1&systemid=$id\"></iframe>");
+
+                        }
+                        mysql_close($link);
+                }
+        }
+	]]></code>
+        </method>
+       </methods>
+   </class>
+  </classes>
+  <menus>
+  </menus>
+  <user_rights>
+    <groups>
+    </groups>
+    <profiles>
+    </profiles>
+  </user_rights>
+</itop_design>

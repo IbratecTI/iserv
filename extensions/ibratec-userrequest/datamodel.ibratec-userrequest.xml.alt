@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
+  <constants>
+  </constants>
+  <classes>
+  <classes>
+    <class id="UserRequest">
+      <fields>
+        <field id="prev_date" xsi:type="AttributeDateTime" _delta="define">
+          <always_load_in_tables>true</always_load_in_tables>
+          <sql>prev_date</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+      </fields>
+      <state id="new">
+         <flags>
+           <attribute id="prev_date">
+             <must_prompt/>
+           </attribute>
+         </flags>
+      </state>
+      <presentation>
+        <details>
+          <item id="fieldset:Ticket:date" _delta="merge">
+           <rank>30</rank>
+           <items>
+            <item id="prev_date">
+              <rank>90</rank>
+            </item>
+           </items>
+          </item>
+        </details>
+      </presentation>
+    </class>
+  </classes>
+  <menus>
+  </menus>
+  <user_rights>
+    <groups>
+    </groups>
+    <profiles>
+    </profiles>
+  </user_rights>
+</itop_design>

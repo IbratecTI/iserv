@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
+  <constants>
+  </constants>
+  <classes>
+    <class id="TelephonyCI" _delta="merge">
+      <fields>
+        <field id="shared" xsi:type="AttributeEnum" _delta="define">
+          <values>
+            <value id="yes">yes</value>
+            <value id="no">no</value>
+          </values>
+          <sql>shared</sql>
+          <default_value>no</default_value>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+        <field id="carrier" xsi:type="AttributeEnum" _delta="define">
+          <values>
+            <value id="vivomobile">VIVO</value>
+            <value id="vivo">VIVO Fixo</value>
+            <value id="claro">CLARO</value>
+          </values>
+          <sql>carrier</sql>
+          <default_value>no</default_value>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+      </fields>
+    </class>
+    <class id="Phone" _delta="merge">
+      <fields>
+        <field id="extension" xsi:type="AttributeString" _delta="define">
+          <sql>extension</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+      </fields>
+      <presentation>
+        <details>
+          <items>
+            <item id="extension" _delta="define">
+              <rank>85</rank>
+            </item>
+            <item id="shared" _delta="define">
+              <rank>86</rank>
+            </item>
+            <item id="carrier" _delta="define">
+              <rank>87</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="extension" _delta="define">
+              <rank>85</rank>
+            </item>
+            <item id="shared" _delta="define">
+              <rank>86</rank>
+            </item>
+            <item id="carrier" _delta="define">
+              <rank>87</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="extension" _delta="define">
+              <rank>65</rank>
+            </item>
+            <item id="shared" _delta="define">
+              <rank>66</rank>
+            </item>
+            <item id="carrier" _delta="define">
+              <rank>67</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="IPPhone" _delta="merge">
+      <fields>
+        <field id="extension" xsi:type="AttributeString" _delta="define">
+          <sql>extension</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+      </fields>
+      <presentation>
+        <details>
+          <items>
+            <item id="extension" _delta="define">
+              <rank>85</rank>
+            </item>
+            <item id="shared" _delta="define">
+              <rank>86</rank>
+            </item>
+            <item id="carrier" _delta="define">
+              <rank>87</rank>
+            </item>
+            <item id="powerconsumption" _delta="define">
+              <rank>88</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="extension" _delta="define">
+              <rank>85</rank>
+            </item>
+            <item id="shared" _delta="define">
+              <rank>86</rank>
+            </item>
+            <item id="carrier" _delta="define">
+              <rank>87</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="extension" _delta="define">
+              <rank>65</rank>
+            </item>
+            <item id="shared" _delta="define">
+              <rank>66</rank>
+            </item>
+            <item id="carrier" _delta="define">
+              <rank>67</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="MobilePhone" _delta="merge">
+      <fields>
+        <field id="extension" xsi:type="AttributeString" _delta="define">
+          <sql>extension</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+      </fields>
+      <presentation>
+        <details>
+          <items>
+            <item id="extension" _delta="define">
+              <rank>85</rank>
+            </item>
+            <item id="shared" _delta="define">
+              <rank>86</rank>
+            </item>
+            <item id="carrier" _delta="define">
+              <rank>87</rank>
+            </item>
+            <item id="powerconsumption" _delta="define">
+              <rank>88</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="extension" _delta="define">
+              <rank>85</rank>
+            </item>
+            <item id="shared" _delta="define">
+              <rank>86</rank>
+            </item>
+            <item id="carrier" _delta="define">
+              <rank>87</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="extension" _delta="define">
+              <rank>65</rank>
+            </item>
+            <item id="shared" _delta="define">
+              <rank>66</rank>
+            </item>
+            <item id="carrier" _delta="define">
+              <rank>67</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+  </classes>
+  <menus>
+  </menus>
+  <user_rights>
+    <groups>
+    </groups>
+    <profiles>
+    </profiles>
+  </user_rights>
+</itop_design>

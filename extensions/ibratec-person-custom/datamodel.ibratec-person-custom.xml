@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
+  <constants>
+  </constants>
+  <classes>
+   <class id="Person" _delta="merge">
+    <fields>
+      <field id="extension" xsi:type="AttributeString" _delta="define">
+        <default_value/>
+        <sql>extension</sql>
+        <is_null_allowed>true</is_null_allowed>
+      </field>
+    </fields>
+    <presentation>
+      <details>
+        <items _delta="merge">
+          <item id="col:col2">
+            <rank>50</rank>
+            <items>
+              <item id="fieldset:Person:notifiy">
+                <rank>10</rank>
+                <items>
+                  <item id="extension">
+                    <rank>50</rank>
+                  </item>
+                </items>
+              </item>
+            </items>
+          </item>
+        </items>
+      </details>
+      <search>
+        <items _delta="merge">
+          <item id="extension">
+            <rank>120</rank>
+          </item>
+        </items>
+      </search>
+      <list>
+        <items _delta="merge">
+          <item id="extension">
+            <rank>70</rank>
+          </item>
+        </items>
+      </list>	
+    </presentation>
+   </class>
+  </classes>
+  <user_rights>
+    <groups>
+    </groups>
+    <profiles>
+    </profiles>
+  </user_rights>
+</itop_design>

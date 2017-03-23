@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
+  <constants>
+  </constants>
+  <classes>
+    <class id="UserRequest">
+      <fields>
+        <field id="prev_date" xsi:type="AttributeDateTime" _delta="define">
+          <always_load_in_tables>true</always_load_in_tables>
+          <states>
+            <state id="new"/>
+            <state id="escalated_tto"/>
+            <state id="assigned"/>
+            <state id="pending"/>
+            <state id="approved"/>
+            <state id="escalated_ttr"/>
+          </states>
+          <sql>prev_date</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+        <field id="previni_date" xsi:type="AttributeDateTime" _delta="define">
+          <always_load_in_tables>true</always_load_in_tables>
+          <states>
+            <state id="new"/>
+            <state id="escalated_tto"/>
+            <state id="assigned"/>
+            <state id="pending"/>
+            <state id="approved"/>
+            <state id="escalated_ttr"/>
+          </states>
+          <sql>previni_date</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+        <field id="product" xsi:type="AttributeString" _delta="define">
+          <sql>product</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+        <field id="subproduct" xsi:type="AttributeString" _delta="define">
+          <sql>subproduct</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+        <field id="searchkeys" xsi:type="AttributeString" _delta="define">
+          <sql>searchkeys</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+        <field id="proposal_flag" xsi:type="AttributeEnum" _delta="define">
+          <values>
+            <value id="yes">yes</value>
+            <value id="no">no</value>
+          </values>
+          <sql>proposal_flag</sql>
+          <default_value>no</default_value>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+        <field id="change_source" xsi:type="AttributeEnum" _delta="define">
+          <values>
+            <value id="yes">yes</value>
+            <value id="no">no</value>
+          </values>
+          <sql>change_source</sql>
+          <default_value>no</default_value>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
+      </fields>
+      <lifecycle>
+       <states>
+        <state id="new">
+           <flags>
+             <attribute id="prev_date" _delta="define">
+               <must_prompt/>
+             </attribute>
+           </flags>
+        </state>
+        <state id="new">
+           <flags>
+             <attribute id="previni_date" _delta="define">
+               <must_prompt/>
+             </attribute>
+           </flags>
+        </state>
+       </states>
+      </lifecycle>
+      <presentation>
+        <details>
+         <items>
+          <item id="col:col1">
+            <rank>50</rank>
+            <items>
+              <item id="fieldset:Ticket:baseinfo" _delta="merge">
+                <rank>10</rank>
+                <items>
+                  <item id="product">
+                    <rank>70</rank>
+                  </item>
+                  <item id="subproduct">
+                    <rank>80</rank>
+                  </item>
+                  <item id="searchkeys">
+                    <rank>90</rank>
+                  </item>
+                  <item id="proposal_flag">
+                    <rank>100</rank>
+                  </item>
+                  <item id="change_source">
+                    <rank>110</rank>
+                  </item>
+                </items>
+              </item>
+            </items>
+          </item>
+          <item id="col:col2">
+           <rank>60</rank>
+           <items>
+            <item id="fieldset:Ticket:date" _delta="merge">
+             <rank>30</rank>
+             <items>
+              <item id="previni_date">
+                <rank>90</rank>
+              </item>
+              <item id="prev_date">
+                <rank>100</rank>
+              </item>
+             </items>
+            </item>
+           </items>
+          </item>
+         </items>
+        </details>
+        <search>
+         <items _delta="merge">
+          <item id="product">
+            <rank>250</rank>
+          </item>
+          <item id="subproduct">
+            <rank>260</rank>
+          </item>
+          <item id="searchkeys">
+            <rank>270</rank>
+          </item>
+          <item id="proposal_flag">
+            <rank>280</rank>
+          </item>
+          <item id="change_source">
+            <rank>290</rank>
+          </item>
+         </items>
+        </search>
+      </presentation>
+    </class>
+  </classes>
+  <menus>
+  </menus>
+  <user_rights>
+    <groups>
+    </groups>
+    <profiles>
+    </profiles>
+  </user_rights>
+</itop_design>
