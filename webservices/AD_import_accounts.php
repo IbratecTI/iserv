@@ -26,40 +26,55 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Configuration parameters: adjust them to connect to your AD server
 // And configure the mapping between AD groups and iTop profiles
-$domain = '@ibratecgrafica.com.br';
+$domain = '@ibratec.local';
 $aConfig = array(
-					// Configuration of the Active Directory connection 
-					'host' 	=> 'ldap.ibratec.local', // IP or FQDN of your domain controller
-					'port' 	=> '389', // LDAP port, 398=LDAP, 636= LDAPS
-					'dn'		=> 'ou=people,dc=ibratecgrafica,dc=com,dc=br', // Domain DN
-					'username'	=> '', // username with read access
-	 				'password'	=> '', // password for above
-	 				
-					 // Query to retrieve and filter the users from AD
-	 				// Example: retrieve all users from the AD Group "iTop Users"
-	 				'ldap_query' => '(&(objectClass=posixAccount))',
-	 				#'ldap_query' => '(&(objectClass=posixAccount)(member=CN=DP_TI,ou=people,dc=ibratecgrafica,dc=com,dc=br))',
-	 			    // Example 2: retrieves ALL the users from AD
-	 				// 'ldap_query' => '(&(objectCategory=user))', // Retrieve all users
-	 				
-	 				// Which field to use as the iTop login samaccountname or userprincipalname ?
-	 				'login' => 'uid',
-	 				//'login' => 'userprincipalname',
-	 				
-	 				// Mapping between the AD groups and the iTop profiles
-					'profiles_mapping' => array(
-						//AD Group Name => iTop Profile Name
-						'Administrators' => 'Administrator',
-					),
-					
-					// Since each iTop user must have at least one profile, assign the profile
-					// Below to users for which there was no match in the above mapping
-					'default_profile' => 'Portal user',
-					
-					'default_language' => 'PT BR', // Default language for creating new users
-					
-					'default_organization' => 1, // ID of the default organization for creating new contacts
-				);
+        // Configuration of the Active Directory connection 
+        'host' 	=> '192.168.0.10', // IP or FQDN of your domain controller
+        'port' 	=> '389', // LDAP port, 398=LDAP, 636= LDAPS
+        'dn'		=> array(
+            'ou=Usuarios Ibratec,dc=ibratec,dc=local', // Base DN Usuários Ibratec
+            'ou=Terceiros,dc=ibratec,dc=local', // Base DN Terceiros
+            ),
+        'username'	=> 'itopuser@ibratec.local', // username with read access
+        'password'	=> 'e2WTS1l8', // password for above
+
+         // Query to retrieve and filter the users from AD
+        // Example: retrieve all users from the AD Group "iTop Users"
+        'ldap_query' => '(&(objectClass=user)(CN=*))',
+        #'ldap_query' => '(&(objectClass=posixAccount)(member=CN=DP_TI,ou=people,dc=ibratecgrafica,dc=com,dc=br))',
+        // Example 2: retrieves ALL the users from AD
+        // 'ldap_query' => '(&(objectCategory=user))', // Retrieve all users
+        //'ldap_query_group' => '(member:1.2.840.113556.1.4.1941:= #user#)',
+        'ldap_query_group' => '(&(objectcategory=group)(distinguishedName= #group#))',    
+        // Which field to use as the iTop login samaccountname or userprincipalname ?
+        'login' => 'samaccountname',
+        //'login' => 'userprincipalname',
+
+        // Mapping between the AD groups and the iTop profiles
+        'profiles_mapping' => array(
+        //AD Group Name => iTop Profile Name
+        'itop_administrator' => 'Administrator',
+        'itop_change_approver' => 'Change Approver',
+        'itop_change_implementor' => 'Change Implementor',
+        'itop_change_supervisor' => 'Change Supervisor',
+        'itop_configuration_manager' => 'Configuration Manager',
+        'itop_document_author' => 'Document author',
+        'itop_hostmaster' => 'Hostmaster',
+        'itop_portal_power_user' => 'Portal power user',
+        'itop_portal_user' => 'Portal user',
+        'itop_problem_manager' => 'Problem Manager',
+        'itop_service_desk_agent' => 'Service Desk Agent',
+        'itop_service_manager' => 'Service Manager',
+        'itop_support_agent' => 'Support Agent',
+        ),
+
+        // Since each iTop user must have at least one profile, assign the profile
+        // Below to users for which there was no match in the above mapping
+        'default_profile' => 'Portal user',
+        'default_language' => 'PT BR', // Default language for creating new users
+        'default_organization' => '4', // ID of the default organization for creating new contacts
+        'default_location' => '1', //Localizacao padrao
+);
 // End of configuration
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -80,12 +95,25 @@ require_once(APPROOT.'application/startup.inc.php');
 
 // List of attributes to retrieve
 $aAttribs = array(
-	'uid',
+	'samaccountname',
 	'sn',
 	'givenname',
 	'memberof',
-	'cn',
-	'suseMailAcceptAddress',
+	'displayname',
+	'mail',
+	'postofficebox', //Matricula
+	'division', //Centro de custo
+	'title', //Cargo
+	'physicaldeliveryofficename', //unidade
+	'l', //municipio
+	'department', //departamento
+        'manager', //gerente ou responsável direto
+        'mobile', //telefone celular
+        'postcode', //matricula
+        'telephonenumber', //telefone fixo
+        'streetaddress', //endereço
+        'userprincipalname', //nome no dominio do AD
+        'employeenumber', //matricula
 );
 
 $g_aUsersCache = null;   	// Cache of all the iTop users to speed up searches
@@ -135,7 +163,7 @@ function ProcessUser($aData, $index, $aConfig, $oChange = null)
 {
 	$sAction = 'error';
 	
-	$sUserLogin = $aData['uid'];
+	$sUserLogin = $aData['samaccountname'];
 	if (!is_array($aData['memberof']))
 	{
 		$aADGroups = array($aData['memberof']);
@@ -149,6 +177,7 @@ function ProcessUser($aData, $index, $aConfig, $oChange = null)
 	{
 		$aMatches = array();
 		$sShortGroupString = '';
+		#if (preg_match('/^CN=([^,]+)/', $sGroupString, $aMatches))
 		if (preg_match('/^CN=([^,]+)/', $sGroupString, $aMatches))
 		{
 			$sShortGroupString = $aMatches[1];
@@ -159,21 +188,13 @@ function ProcessUser($aData, $index, $aConfig, $oChange = null)
 			$aITopProfiles[] = $aConfig['profiles_mapping'][$sShortGroupString];
 		}
 	}
-	$sUserProfiles = GetUserProfilesByLogin($sUserLogin);
-	if (isset($sUserProfiles))
-	{
-		foreach($sUserProfiles as $item)
-		{
-			$aITopProfiles[] = $item;
-		}
-	}
 	if (count($aITopProfiles) == 0)
 	{
 		// Each user must have at least one profile
 		// Assign the 'default_profile' to this user
 		$aITopProfiles[] = $aConfig['default_profile'];
 	}
-	echo "<h2>User#{$index}: {$aData['cn']}</h2>\n";
+	echo "<h2>User#{$index}: {$aData['displayname']}</h2>\n";
 	echo "<table>";
 	foreach($aData as $sAttrib => $value)
 	{
@@ -199,19 +220,25 @@ function ProcessUser($aData, $index, $aConfig, $oChange = null)
 	if ($oITopUser == null)
 	{
 		// Check if a contact needs to be created or not
-		$oPerson = GetPersonByEmail($aData['suseMailAcceptAddress']);
+		$oPerson = GetPersonByEmail($aData['mail']);
 		if (is_object($oPerson))
 		{
-			echo "<p>A person with the email='{$aData['suseMailAcceptAddress']}' was found ".$oPerson->GetHyperlink().". This person will be used when creating the account.</p>";
+			echo "<p>A person with the email='{$aData['mail']}' was found ".$oPerson->GetHyperlink().". This person will be used when creating the account.</p>";
 		}
 		else if ($oPerson == null)
 		{
 			echo "<p>A new person will be created.</p>";
 			$oPerson = new Person();
-			$oPerson->Set('name', $aData['sn']);
+			$oPerson->Set('name', str_replace($aData['givenname'],'',trim(ucwords(strtolower($aData['displayname'])))));
 			$oPerson->Set('first_name', $aData['givenname']);
-			$oPerson->Set('email', $aData['suseMailAcceptAddress']);
-			$oPerson->Set('org_id', $aConfig['default_organization']);
+			$oPerson->Set('email', $aData['mail']);
+			//$oPerson->Set('org_id', $aConfig['default_organization']);
+			//echo ucwords(strtolower($aData['title']));
+			$oPerson->Set('function', ucwords(strtolower($aData['title'])));
+			$oPerson->Set('employee_number', $aData['postofficebox']);
+                        //$oPerson->Set('cost_center', $aData['division']);
+                        $oPerson->Set('location_id',FindUserLocation($aData['l'], $aData['department']));
+                        $oPerson->Set('org_id',FindOrgId($aData['title'], $aData['department']));
 			if ($oChange != null)
 			{
 				$oPerson->DBInsertTracked($oChange);
@@ -285,6 +312,64 @@ function ProcessUser($aData, $index, $aConfig, $oChange = null)
 	return $sAction;
 }
 
+function FindUserLocation($location = 'Barueri', $department = 'ABC')
+{
+    
+    static $oSearch = null; // OQL Query cache
+    if ($oSearch == null)
+    {
+            $sOQL = 'SELECT Location WHERE city = :city AND name LIKE :name';
+            $oSearch = DBObjectSearch::FromOQL($sOQL);
+    }
+    $oSet = new CMDBObjectSet($oSearch, array(), array('city' => $location, 'name' => '%'.$department.'%'),NULL,'1');
+    switch($oSet->Count())
+    {
+            case 0:
+                if ($location == 'Barueri')
+                {
+                        $location_id ='1';
+                }
+                else 
+                {
+                        $location_id ='2';
+                }
+            break;
+
+            case 1:
+                        $oLoc = $oSet->Fetch();
+                        $location_id = $oLoc->GetKey();
+            break;
+
+            default:
+            $location_id = '1';
+    }
+    return $location_id;
+}
+
+function FindOrgId($title = '', $department = 'ABC')
+{
+    $org_id = '1';
+    $title = strtolower($title);
+    $department = strtolower($department);
+    if ($department=='ti')
+    {
+        $org_id = '6';
+    } else if (substr_count($title, 'diretor')>=1)
+    {
+        $org_id = '2';
+    } else if (substr_count($title, 'ger ')>=1 || substr_count($title, 'gerente')>=1)
+    {
+        $org_id = '3';
+    } else if (substr_count($title, 'coord ')>=1 || substr_count($title, 'coordenador')>=1)
+    {
+        $org_id = '3';
+    } else 
+    {
+        $org_id = '4';
+    }
+    return $org_id;
+}
+
 /**
  * Search the given user (identified by its login) in the iTop database
  * @param $sLogin string The login of the user
@@ -310,6 +395,46 @@ function GetUserByLogin($sLogin)
 	return $result;
 }
 
+function GetNestedGroups($ad,$aGroup,$aConfigSearch,$aConfigDn)
+{
+    $sLdapSearch = str_replace('#group#', $aGroup, $aConfigSearch);
+    $aAttribs = array('memberof');
+    $search = ldap_search($ad, $aConfigDn, $sLdapSearch , $aAttribs) or die ("ldap search failed");
+    $entries = ldap_get_entries($ad, $search);
+    $aoutput=array();
+    $a=array();
+    foreach($entries as $adata)
+    {
+        if($adata['count'] != 0)
+        {
+            foreach($adata as $key=>$amemberofdata)
+            {
+                if($key==="memberof")
+                {
+                    foreach($amemberofdata as $keymgo=>$sgroup)
+                    {
+                        $a[$keymgo]=$sgroup;
+                    }
+                    foreach($a as $akey=>$soutgroup)
+                    {
+                        if($akey != 'count')
+                        {
+                        $aoutput[]=$soutgroup;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if(empty($aoutput))
+    {
+        return null;
+    }
+    else
+    {
+        return $aoutput;
+    }
+}
 
 /**
  * Initializes the cache for quickly searching iTop users
@@ -326,50 +451,6 @@ function InitUsersCache()
 	while($oUser = $oSet->Fetch())
 	{
 		$g_aUsersCache[$oUser->Get('login')] = $oUser;
-	}
-	return $iRet;
-}
-
-/**
- * Search the given user (identified by its login) in the iTop database
- * @param $sLogin string The login of the user
- * @return mixed null => nothing found, object => the user to synchronize, string => error message
- */
-function GetUserProfilesByLogin($sLogin)
-{
-	global $g_aUsersProfilesCache;
-	$profiles = array();
-	$result = null;
-	if ($g_aUsersProfilesCache == null) InitUsersProfilesCache();
-	if (isset($g_aUsersProfilesCache[$sLogin]))
-	{
-		foreach($g_aUsersProfilesCache[$sLogin] as $item)
-		{
-			$profile[] = $item;
-		}
-	}
-	if (isset($profile))
-	{
-		$result = $profile;
-	}	
-	return $result;
-}
-
-/**
- * Initializes the cache for quickly searching iTop users profiles
- * @param none
- * @return integer Number of users fetched from iTop  
- */
-function InitUsersProfilesCache()
-{
-	global $g_aUsersProfilesCache;
-	$sOQL = "SELECT URP_UserProfile WHERE userid_finalclass_recall='UserLDAP'";
-	$oSearch = DBObjectSearch::FromOQL($sOQL);
-	$oSet = new CMDBObjectSet($oSearch);
-	$iRet = $oSet->Count();
-	while($oUser = $oSet->Fetch())
-	{
-		$g_aUsersProfilesCache[$oUser->Get('userid_friendlyname')][] = $oUser->Get('profile');
 	}
 	return $iRet;
 }
@@ -494,82 +575,111 @@ else
 	echo "<h1 style=\"color:#900\">Simulation mode -- no action will be performed</h1>";
 	echo "<p>Set the parameter simulation=0 to trigger the actual execution.</p>";
 } 
-$ad = ldap_connect($aConfig['host'], $aConfig['port']) or die( "Could not connect to {$aConfig['host']} on port {$aConfig['port']}!" );
-echo "<p>Connected to {$aConfig['host']} on port {$aConfig['port']}</p>\n";
-// Set version number
-ldap_set_option($ad, LDAP_OPT_PROTOCOL_VERSION, 3) or die ("Could not set ldap protocol");
-ldap_set_option($ad, LDAP_OPT_REFERRALS,0) or die ("could no se the ldap referrals");
-
-// Binding to ldap server
-$bd = ldap_bind($ad, $aConfig['username'], $aConfig['password']) or die ("Could not bind");
-echo "<p>Identified as {$aConfig['username']}</p>\n";
-
-$sLdapSearch = $aConfig['ldap_query'];
-
-echo "<p>LDAP Query: '$sLdapSearch'</p>";
-$search = ldap_search($ad, $aConfig['dn'], $sLdapSearch /*, $aAttribs*/) or die ("ldap search failed");
-
-$entries = ldap_get_entries($ad, $search);
-$index = 1;
-$aStatistics = array(
-	'created' => 0,
-	'synchronized' => 0,
-	'error' => 0,
-);
-$iCreated = 0;
-$iSynchronized = 0;
-$iErrors = 0;	
-if ($entries["count"] > 0)
+foreach($aConfig['dn'] as $bdn)
 {
-	$iITopUsers = InitUsersCache();
-	echo "<h1>{$entries["count"]} user(s) found in Active Directory, $iITopUsers (including non-LDAP users) found in iTop.</h1>\n";
-	foreach($entries as $key => $aEntry)
-	{
-		//echo "<pre>$key\n";
-		//print_r($aEntry);
-		//echo "</pre>\n";
-		if (strcmp($key,'count') != 0)
-		{
-			$aData = array();
-			foreach($aAttribs as $sName)
-			{
-				$aData[$sName] = ReadLdapValue($aEntry, $sName);
-			}
-			if (empty($aData['suseMailAcceptAddress']))
-			{
-				$aData['suseMailAcceptAddress'] = $aData['uid'].$domain;
-			}
-			try
-			{
-				$sAction = ProcessUser($aData, $index, $aConfig, $oMyChange);
-			}
-			catch(Exception $e)
-			{
-				echo "<p><b>An error occured while processing $index: ".$e->getMessage()."</b></p>";
-				$sAction = 'error';
-			}
-			echo "<hr/>\n";
-			$aStatistics[$sAction]++;
-			$index++;
-		}
-	}
+    $ad = ldap_connect($aConfig['host'], $aConfig['port']) or die( "Could not connect to {$aConfig['host']} on port {$aConfig['port']}!" );
+    echo "<p>Connected to {$aConfig['host']} on port {$aConfig['port']}</p>\n";
+    // Set version number
+    ldap_set_option($ad, LDAP_OPT_PROTOCOL_VERSION, 3) or die ("Could not set ldap protocol");
+    ldap_set_option($ad, LDAP_OPT_REFERRALS,0) or die ("could no se the ldap referrals");
+
+    // Binding to ldap server
+    $bd = ldap_bind($ad, $aConfig['username'], $aConfig['password']) or die ("Could not bind");
+    echo "<p>Identified as {$aConfig['username']}</p>\n";
+
+    $sLdapSearch = $aConfig['ldap_query'];
+
+    echo "<p>LDAP Query: '$sLdapSearch'</p>";
+    $search = ldap_search($ad, $bdn, $sLdapSearch /*, $aAttribs*/) or die ("ldap search failed");
+
+    $entries = ldap_get_entries($ad, $search);
+    //print_r($entries);
+    $index = 1;
+    $aStatistics = array(
+            'created' => 0,
+            'synchronized' => 0,
+            'error' => 0,
+    );
+    $iCreated = 0;
+    $iSynchronized = 0;
+    $iErrors = 0;	
+    if ($entries["count"] > 0)
+    {
+        $iITopUsers = InitUsersCache();
+        echo "<h1>{$entries["count"]} user(s) found in Active Directory, $iITopUsers (including non-LDAP users) found in iTop.</h1>\n";
+        foreach($entries as $key => $aEntry)
+        {
+            if (strcmp($key,'count') != 0)
+            {
+                $aData = array();
+                foreach($aAttribs as $sName)
+                {
+                    $aData[$sName] = ReadLdapValue($aEntry, $sName);
+                }
+                $aDataMemberof=array();
+                if(gettype($aData['memberof'])=='array')
+                {
+                    foreach($aData['memberof'] as $sGroup)
+                    {
+                        $aDataMemberof = GetNestedGroups($ad,$sGroup,$aConfig['ldap_query_group'],$bdn);
+                        if(gettype($aDataMemberof)=='array')
+                        {
+                            foreach($aDataMemberof as $sNestedGroup)
+                            {
+                                $aData['memberof'][]=$sNestedGroup;
+                            }
+                        }
+                    }
+                }
+                else if(gettype($aData['memberof'])=='string')
+                {
+                    $sGroup=$aData['memberof'];
+                    unset($aData['memberof']);
+                    $aData['memberof']=array();
+                    $aData['memberof'][]=$sGroup;
+                    $aDataMemberof = GetNestedGroups($ad,$sGroup,$aConfig['ldap_query_group'],$bdn);
+                    if(gettype($aDataMemberof)=='array')
+                    {
+                        foreach($aDataMemberof as $sNestedGroup)
+                        {
+
+                            $aData['memberof'][]=$sNestedGroup;
+                        }
+                    }
+                }
+                try
+                {
+                    $sAction = ProcessUser($aData, $index, $aConfig, $oMyChange);
+                }
+                catch(Exception $e)
+                {
+                        echo "<p><b>An error occured while processing $index: ".$e->getMessage()."</b></p>";
+                        $sAction = 'error';
+                }
+                echo "<hr/>\n";
+                $aStatistics[$sAction]++;
+                $index++;
+            }
+        }
+    }
+    else
+    {
+            echo "<p>Nothing found !</p>\n";
+            echo "<p>LDAP query was: $sLdapSearch</p>\n";
+    }
+    ldap_unbind($ad);
+
+    if ($bSimulationMode)
+    {
+            echo "<h1 style=\"color:#900\">Simulation mode -- no action was performed</h1>";
+    }
+    echo "<h1>Statistics:</h1>";
+    echo "<table>";
+    foreach($aStatistics as $sKey => $iValue)
+    {
+            echo "<tr><td style=\"vertical-align:top;background-color:eee;\">$sKey</td>\n";
+            echo "<td style=\"vertical-align:top;background-color:eee;\">$iValue</td></tr>\n";
+    }
+    echo "</table>";
 }
-else
-{
-	echo "<p>Nothing found !</p>\n";
-	echo "<p>LDAP query was: $sLdapSearch</p>\n";
-}
-ldap_unbind($ad);
-if ($bSimulationMode)
-{
-	echo "<h1 style=\"color:#900\">Simulation mode -- no action was performed</h1>";
-}
-echo "<h1>Statistics:</h1>";
-echo "<table>";
-foreach($aStatistics as $sKey => $iValue)
-{
-	echo "<tr><td style=\"vertical-align:top;background-color:eee;\">$sKey</td>\n";
-	echo "<td style=\"vertical-align:top;background-color:eee;\">$iValue</td></tr>\n";
-}
-echo "</table>";
 ?>
