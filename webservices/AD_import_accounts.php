@@ -95,12 +95,12 @@ require_once(APPROOT.'application/startup.inc.php');
 
 // List of attributes to retrieve
 $aAttribs = array(
-	'samaccountname',
-	'sn',
-	'givenname',
+	'samaccountname', //Login
+	'sn', //Sobrenome
+	'givenname', //Primeiro Nome
 	'memberof',
-	'displayname',
-	'mail',
+	'displayname', // Nome completo em maiúsculas
+	'mail', //email
 	'postofficebox', //Matricula
 	'division', //Centro de custo
 	'title', //Cargo
