@@ -229,16 +229,18 @@ function ProcessUser($aData, $index, $aConfig, $oChange = null)
 		{
 			echo "<p>A new person will be created.</p>";
 			$oPerson = new Person();
-			$oPerson->Set('name', str_replace($aData['givenname'],'',trim(ucwords(strtolower($aData['displayname'])))));
-			$oPerson->Set('first_name', $aData['givenname']);
+			$oPerson->Set('name', ucwords(strtolower($aData['sn'])));
+			$oPerson->Set('first_name', ucwords(strtolower($aData['givenname'])));
 			$oPerson->Set('email', $aData['mail']);
 			//$oPerson->Set('org_id', $aConfig['default_organization']);
 			//echo ucwords(strtolower($aData['title']));
 			$oPerson->Set('function', ucwords(strtolower($aData['title'])));
-			$oPerson->Set('employee_number', $aData['postofficebox']);
+			$oPerson->Set('employee_number', $aData['employeenumber']);
                         //$oPerson->Set('cost_center', $aData['division']);
                         $oPerson->Set('location_id',FindUserLocation($aData['l'], $aData['department']));
                         $oPerson->Set('org_id',FindOrgId($aData['title'], $aData['department']));
+			$oPerson->Set('phone', $aData['telephonenumber']);  
+			$oPerson->Set('mobile_phone', $aData['mobile']);
 			if ($oChange != null)
 			{
 				$oPerson->DBInsertTracked($oChange);
