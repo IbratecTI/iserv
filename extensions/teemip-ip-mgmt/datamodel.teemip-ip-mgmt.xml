@@ -1744,6 +1744,11 @@
           <default_value/>
           <is_null_allowed>true</is_null_allowed>
         </field>
+        <field id="aliases" xsi:type="AttributeAliasList">
+          <sql>aliases</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+        </field>
         <field id="usage_id" xsi:type="AttributeExternalKey">
           <filter><![CDATA[SELECT IPUsage AS i WHERE i.org_id = :this->org_id]]></filter>
           <dependencies>
@@ -1778,20 +1783,23 @@
             <item id="fqdn">
               <rank>20</rank>
             </item>
-            <item id="usage_id">
+            <item id="aliases">
               <rank>30</rank>
             </item>
-            <item id="org_id">
+            <item id="usage_id">
               <rank>40</rank>
             </item>
-            <item id="requestor_id">
+            <item id="org_id">
               <rank>50</rank>
             </item>
-            <item id="allocation_date">
+            <item id="requestor_id">
               <rank>60</rank>
             </item>
-            <item id="release_date">
+            <item id="allocation_date">
               <rank>70</rank>
+            </item>
+            <item id="release_date">
+              <rank>80</rank>
             </item>
           </items>
         </search>
@@ -1803,8 +1811,11 @@
             <item id="fqdn">
               <rank>20</rank>
             </item>
-            <item id="usage_id">
+            <item id="aliases">
               <rank>30</rank>
+            </item>
+            <item id="usage_id">
+              <rank>40</rank>
             </item>
           </items>
         </list>
@@ -2077,6 +2088,7 @@
         <icon>images/ipaddress.png</icon>
         <reconciliation>
           <attributes>
+            <attribute id="fqdn"/>
             <attribute id="ip"/>
             <attribute id="org_id"/>
             <attribute id="org_name"/>
@@ -2184,6 +2196,9 @@
 		            <item id="fqdn">
 		              <rank>30</rank>
 		            </item>
+ 		            <item id="aliases">
+              		  <rank>40</rank>
+            		</item>
                   </items>
                 </item>
                 <item id="fieldset:Class:IPAddress:ipinfo">
@@ -2215,23 +2230,26 @@
             <item id="fqdn">
               <rank>30</rank>
             </item>
-            <item id="usage_id">
+            <item id="aliases">
               <rank>40</rank>
             </item>
-            <item id="subnet_id">
+            <item id="usage_id">
               <rank>50</rank>
             </item>
-            <item id="org_id">
+            <item id="subnet_id">
               <rank>60</rank>
             </item>
-            <item id="requestor_id">
+            <item id="org_id">
               <rank>70</rank>
             </item>
+            <item id="requestor_id">
+              <rank>80</rank>
+            </item>
 		    <item id="allocation_date">
-		      <rank>80</rank>
+		      <rank>90</rank>
 		    </item>
             <item id="release_date">
-              <rank>90</rank>
+              <rank>100</rank>
             </item>
           </items>
         </search>
@@ -2246,20 +2264,23 @@
             <item id="fqdn">
               <rank>30</rank>
             </item>
-            <item id="usage_id">
+            <item id="aliases">
               <rank>40</rank>
             </item>
-            <item id="subnet_id">
+            <item id="usage_id">
               <rank>50</rank>
             </item>
-            <item id="org_id">
+            <item id="subnet_id">
               <rank>60</rank>
             </item>
+            <item id="org_id">
+              <rank>70</rank>
+            </item>
 		    <item id="allocation_date">
-		      <rank>70</rank>
+		      <rank>80</rank>
 		    </item>
             <item id="release_date">
-              <rank>80</rank>
+              <rank>90</rank>
             </item>
           </items>
         </list>
@@ -2282,6 +2303,7 @@
           <format>%1$s</format>
           <attributes>
             <attribute id="name"/>
+            <attribute id="org_name"/>
           </attributes>
         </naming>
         <display_template/>
@@ -2338,6 +2360,15 @@
           </values>
           <sql>ipv4_block_cidr_aligned</sql>
           <default_value>bca_yes</default_value>
+          <is_null_allowed>false</is_null_allowed>
+        </field>
+        <field id="delegate_to_children_only" xsi:type="AttributeEnum">
+          <values>
+            <value>dtc_yes</value>
+            <value>dtc_no</value>
+          </values>
+          <sql>delegate_to_children_only</sql>
+          <default_value>dtc_yes</default_value>
           <is_null_allowed>false</is_null_allowed>
         </field>
         <field id="reserve_subnet_IPs" xsi:type="AttributeEnum">
@@ -2441,6 +2472,9 @@
                     <item id="ipv4_block_cidr_aligned">
                       <rank>30</rank>
                     </item>
+                    <item id="delegate_to_children_only">
+                      <rank>50</rank>
+                    </item>
                   </items>
                 </item>
               </items>
@@ -2482,11 +2516,16 @@
                     <item id="ip_allow_duplicate_name">
                       <rank>10</rank>
                     </item>
-                    <item id="mac_address_format">
+                    <item id="ping_before_assign">
                       <rank>20</rank>
                     </item>
-                    <item id="ping_before_assign">
-                      <rank>30</rank>
+                  </items>
+                </item>
+                <item id="fieldset:Class:IPConfig:otherinfo">
+                  <rank>40</rank>
+                  <items>
+                    <item id="mac_address_format">
+                      <rank>10</rank>
                     </item>
                   </items>
                 </item>
@@ -2502,38 +2541,41 @@
             <item id="ipv4_block_cidr_aligned">
               <rank>30</rank>
             </item>
-            <item id="reserve_subnet_IPs">
+            <item id="delegate_to_children_only">
               <rank>50</rank>
             </item>
-            <item id="ipv4_gateway_ip_format">
+            <item id="reserve_subnet_IPs">
               <rank>60</rank>
             </item>
-            <item id="subnet_low_watermark">
-              <rank>80</rank>
+            <item id="ipv4_gateway_ip_format">
+              <rank>70</rank>
             </item>
-            <item id="subnet_high_watermark">
+            <item id="subnet_low_watermark">
               <rank>90</rank>
             </item>
-            <item id="iprange_low_watermark">
+            <item id="subnet_high_watermark">
               <rank>100</rank>
             </item>
-            <item id="iprange_high_watermark">
+            <item id="iprange_low_watermark">
               <rank>110</rank>
             </item>
-            <item id="ip_allow_duplicate_name">
+            <item id="iprange_high_watermark">
               <rank>120</rank>
             </item>
-            <item id="mac_address_format">
+            <item id="ip_allow_duplicate_name">
               <rank>130</rank>
             </item>
-            <item id="ping_before_assign">
+            <item id="mac_address_format">
               <rank>140</rank>
             </item>
-            <item id="org_id">
+            <item id="ping_before_assign">
               <rank>150</rank>
             </item>
-            <item id="requestor_id">
+            <item id="org_id">
               <rank>160</rank>
+            </item>
+            <item id="requestor_id">
+              <rank>170</rank>
             </item>
           </items>
         </search>
@@ -2588,19 +2630,28 @@
           <default_value/>
           <is_null_allowed>true</is_null_allowed>
         </field>
+        <field id="ipranges_list" xsi:type="AttributeLinkedSet">
+          <linked_class>IPRange</linked_class>
+          <ext_key_to_me>usage_id</ext_key_to_me>
+          <tracking_level/>
+          <edit_mode/>
+        </field>
       </fields>
       <methods/>
       <presentation>
         <details>
           <items>
-            <item id="org_id">
+            <item id="ipranges_list">
               <rank>10</rank>
             </item>
-            <item id="name">
+            <item id="org_id">
               <rank>20</rank>
             </item>
-            <item id="description">
+            <item id="name">
               <rank>30</rank>
+            </item>
+            <item id="description">
+              <rank>40</rank>
             </item>
           </items>
         </details>
@@ -2675,19 +2726,77 @@
           <default_value/>
           <is_null_allowed>true</is_null_allowed>
         </field>
+        <field id="ips_list" xsi:type="AttributeLinkedSet">
+          <linked_class>IPAddress</linked_class>
+          <ext_key_to_me>usage_id</ext_key_to_me>
+          <tracking_level/>
+          <edit_mode/>
+        </field>
       </fields>
-      <methods/>
+      <methods>
+        <method id="CreateBasicIpUsages">
+          <comment/>
+          <static>true</static>
+          <access>public</access>
+          <type>custom</type>
+          <code><![CDATA[ public static function CreateBasicIpUsages($sOrgId)
+	{
+		IPUsage::GetIpUsageId($sOrgId, NETWORK_IP_CODE);
+		IPUsage::GetIpUsageId($sOrgId, GATEWAY_IP_CODE);
+		IPUsage::GetIpUsageId($sOrgId, BROADCAST_IP_CODE);
+	}]]></code>
+        </method>
+        <method id="GetIpUsageId">
+          <comment/>
+          <static>true</static>
+          <access>public</access>
+          <type>custom</type>
+          <code><![CDATA[ public static function GetIpUsageId($sOrgId, $sCode)
+	{
+		$oIpUsage = MetaModel::GetObjectFromOQL("SELECT IPUsage AS i WHERE i.name = '$sCode' AND i.org_id = $sOrgId", null, false);
+		if ($oIpUsage == null)
+		{
+			$oIpUsage = MetaModel::NewObject('IPUsage');
+			$oIpUsage->Set('org_id', $sOrgId);
+			$oIpUsage->Set('name', $sCode);
+			switch ($sCode)
+			{
+				case NETWORK_IP_CODE:
+					$sDesc = NETWORK_IP_DESC;
+					break;
+					
+				case GATEWAY_IP_CODE:
+					$sDesc = GATEWAY_IP_DESC;
+					break;
+					
+				case BROADCAST_IP_CODE:
+					$sDesc = BROADCAST_IP_DESC;
+					
+				default:
+					$sDesc = "";
+					break;
+			}
+			$oIpUsage->Set('description', $sDesc);
+			$oIpUsage->DBInsert();
+		}
+		return ($oIpUsage->GetKey());
+	}]]></code>
+        </method>
+      </methods>
       <presentation>
         <details>
           <items>
-            <item id="org_id">
+            <item id="ips_list">
               <rank>10</rank>
             </item>
-            <item id="name">
+            <item id="org_id">
               <rank>20</rank>
             </item>
-            <item id="description">
+            <item id="name">
               <rank>30</rank>
+            </item>
+            <item id="description">
+              <rank>40</rank>
             </item>
           </items>
         </details>
@@ -2822,7 +2931,7 @@
       <rank>90</rank>
       <parent>Catalogs</parent>
       <oql>SELECT IPConfig</oql>
-      <do_search/>
+      <do_search>1</do_search>
     </menu>
 	<menu id="Typology" xsi:type="DashboardMenuNode" _delta="must_exist">
 	  <definition>

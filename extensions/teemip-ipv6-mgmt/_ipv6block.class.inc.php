@@ -90,7 +90,7 @@ class _IPv6Block extends IPBlock
 		if (empty($iBlockMinPrefix))
 		{
 			$sOrgId = $this->Get('org_id');
-			$iBlockMinPrefix = GetFromGlobalIPConfig('ipv6_block_min_prefix', $sOrgId);
+			$iBlockMinPrefix = IPConfig::GetFromGlobalIPConfig('ipv6_block_min_prefix', $sOrgId);
 		}
 		else
 		{
@@ -281,7 +281,7 @@ class _IPv6Block extends IPBlock
 		if (empty($sBlockCidrAligned))
 		{
 			$sOrgId = $this->Get('org_id');
-			$sBlockCidrAligned = GetFromGlobalIPConfig('ipv6_block_cidr_aligned', $sOrgId);
+			$sBlockCidrAligned = IPConfig::GetFromGlobalIPConfig('ipv6_block_cidr_aligned', $sOrgId);
 		}
 		if ($sBlockCidrAligned == 'bca_yes')
 		{
@@ -985,11 +985,11 @@ EOF
 		$oFirstIpBlockToDel = $this->Get('firstip');
 		$oLastIpBlockToDel = $this->Get('lastip');
 		$iChildOrgId = $aParam['child_org_id'];
-
-		// If block is already delegated, 
+		$sDelegateToChildrenOnly = IPConfig::GetFromGlobalIPConfig('delegate_to_children_only', $iOrgId);
+		
+		// If block should be delegated to children only and if it's already delegated, 
 		// 	Make sure redelegation is done at the same level of organization.
-		//  Make sure that new child organization is different from the current one
-		if ($this->Get('parent_org_id') != 0)
+		if (($sDelegateToChildrenOnly == 'dtc_yes') && ($this->Get('parent_org_id') != 0))
 		{
 			$oBlockOrg = MetaModel::GetObject('Organization', $iOrgId, true /* MustBeFound */);
 			$oChildBlockOrg = MetaModel::GetObject('Organization', $iChildOrgId, true /* MustBeFound */);
@@ -997,12 +997,13 @@ EOF
 			{
 				return (Dict::Format('UI:IPManagement:Action:Delegate:IPBlock:WrongLevelOfOrganization'));
 			}
-			
-			if ($iChildOrgId == $iOrgId)
-			{
-				return (Dict::Format('UI:IPManagement:Action:Delegate:IPBlock:NoChangeOfOrganization'));
-			}
-		} 
+		}
+
+		//  Make sure that new child organization is different from the current one
+		if ($iChildOrgId == $iOrgId)
+		{
+			return (Dict::Format('UI:IPManagement:Action:Delegate:IPBlock:NoChangeOfOrganization'));
+		}
 		
 		// Make sure block has no children blocks and no children subnets
 		$oChildrenBlockSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv6Block AS b WHERE b.parent_id = $iBlockId"));
@@ -1565,7 +1566,8 @@ EOF
 			// Default value may be overwritten but not under absolute minimum value.
 			if (! $this->DoCheckHasMinBlockSize($oFirstIp, $oLastIp))
 			{
-				$this->m_aCheckIssues[] = Dict::Format('UI:IPManagement:Action:New:IPBlock:SmallerThanMinSize', $iBlockMinSize);
+				$iBlockMinPrefix = $this->GetMinBlockPrefix();				
+				$this->m_aCheckIssues[] = Dict::Format('UI:IPManagement:Action:New:IPBlock:SmallerThanMinSize', $iBlockMinPrefix);
 				return;
 			}
 			
@@ -1601,6 +1603,11 @@ EOF
 			//		If no parent is specified (null), then check is done with all such blocks with null parent specified.
 			//		It is done on blocks belonging to the same parent otherwise
 			$oSRangeSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv6Block AS b WHERE b.parent_id = '$iParentId' AND (b.org_id = $sOrgId OR b.parent_org_id = $sOrgId) AND b.id != $iKey"));
+			if ($iParentId == 0)
+			{
+				$oSRangeSet2 = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv6Block AS b WHERE b.parent_org_id != 0 AND b.org_id = $sOrgId AND b.id != '$iKey'"));
+				$oSRangeSet->Append($oSRangeSet2);
+			}
 			while ($oSRange = $oSRangeSet->Fetch())
 			{
 				$oRangeFirstIp = $oSRange->Get('firstip');

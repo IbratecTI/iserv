@@ -109,7 +109,7 @@ class _IPObject extends cmdbAbstractObject
 	function DisplayGlobalParametersInLocalModifyForm(WebPage $oP, $sParameter, $aDefault = array())
 	{
 		// Get Global config object
-		$oIpConfig = GetGlobalIPConfig($this->Get('org_id'));
+		$oIpConfig = IPConfig::GetGlobalIPConfig($this->Get('org_id'));
 		$aDetails = array();
 	
 		// Display Parameter with option to be changed for the transaction

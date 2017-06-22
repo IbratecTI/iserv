@@ -23,7 +23,7 @@
                        }
 
                         // Check if the server exists in OCSinventory
-                        define('OCS_SERVER', 'vox1');   // Host DB Server
+                        define('OCS_SERVER', 'vox1.ibratec.local');   // Host DB Server
                         define('OCS_DB_USER', 'root');  // User to connect to the OCS DB Server
                         define('OCS_DB_PWD', 'ASdk30');         // Password to connect to the OCS DB Server
                         define('OCS_DB_NAME', 'ocsweb');        // Name of the OCS database

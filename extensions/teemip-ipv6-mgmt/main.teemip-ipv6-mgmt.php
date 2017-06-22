@@ -54,7 +54,7 @@ define('ALL_NODES_IP', '0000:0000:0000:0000:0000:0000:0000:0001');
 
 class AttributeIPv6Address extends AttributeString
 {
-	public function GetDefaultValue() {return new ormIPv6; }
+	public function GetDefaultValue(DBObject $oHostObject = null) {return new ormIPv6; }
 	
 	public function GetEditValue($value, $oHostObj = null)
 	{
@@ -118,7 +118,7 @@ class AttributeIPv6Address extends AttributeString
 		return $aValues;
 	}
 
-	public function GetSQLColumns()
+	public function GetSQLColumns($bFullSpec = false)
 	{
 		$aColumns = array();
 		$aColumns[$this->GetCode().'_text'] = 'CHAR(39)';
@@ -170,23 +170,13 @@ class AttributeIPv6Address extends AttributeString
 		return $value->ToString();
 	}
 	
-	public function GetAsHTMLForHistory($sOldValue, $sNewValue, $sLabel = null)
+	public function GetAsHTMLForHistory($sValue, $oHostObject = null, $bLocalize = true)
 	{
-		if (is_null($sLabel))
+		if ($sValue instanceof ormIPv6)
 		{
-			$sLabel = $this->GetLabel();
+			$sValue = $sValue->ToString();
 		}
-
-		if ($sOldValue instanceof ormIPv6)
-		{
-			$sOldValue = $sOldValue->ToString();
-		}
-		if ($sNewValue instanceof ormIPv6)
-		{
-			$sNewValue = $sNewValue->ToString();
-		}
-		$sResult = Dict::Format('Change:AttName_SetTo_NewValue_PreviousValue_OldValue', $sLabel, $sNewValue, $sOldValue);
-		return $sResult;
+		return $sValue;
 	}
 	
 	public function GetValidationPattern()

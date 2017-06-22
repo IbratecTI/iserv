@@ -47,7 +47,7 @@ class _IPv4Subnet extends IPSubnet
 		$iIp = myip2long($this->Get('ip'));
 		$sMask = $this->Get('mask');
 		
-		return MaskToSize($sMask);
+		return $this->MaskToSize($sMask);
 	}
 	
 	/**
@@ -335,7 +335,7 @@ class _IPv4Subnet extends IPSubnet
 		switch ($sOperation)
 		{
 			case 'findspace':
-				if (MaskToBit($sMask) > 28)
+				if ($this->MaskToBit($sMask) > 28)
 				{
 					// No point to look for space in less than /28
 					return ('SizeTooSmall');
@@ -350,7 +350,7 @@ class _IPv4Subnet extends IPSubnet
 				
 			case 'shrinksubnet':
 			case 'splitsubnet':
-				if (MaskToBit($sMask) > 30)
+				if ($this->MaskToBit($sMask) > 30)
 				{
 					// To small to be shrunk or split. Minimum size is /30
 					return ('SizeTooSmall');
@@ -358,7 +358,7 @@ class _IPv4Subnet extends IPSubnet
 			break;
 				
 			case 'expandsubnet':
-				if (MaskToBit($sMask) < 17)
+				if ($this->MaskToBit($sMask) < 17)
 				{
 					// To big to be expanded. Maximum size is /17 (by choice - bigger doesn't make sense))
 					return ('SizeTooBig');
@@ -722,7 +722,7 @@ EOF
 			return (Dict::Format('UI:IPManagement:Action:DoCalculator:IPv4Subnet:EnterMaskOrCIDR'));
 		}
 
-		if (($sMask != '') && (MaskToSize($sMask) == -1))
+		if (($sMask != '') && ($this->MaskToSize($sMask) == -1))
 		{
 			return (Dict::Format('UI:IPManagement:Action:DoCalculator:IPv4Subnet:WrongMask'));
 		}
@@ -810,7 +810,7 @@ EOF
 			break;
 		}
 		$sMaskNewSubnet = mylong2ip($iMaskNewSubnet);
-		$iIpBroadcastNewSubnet = $iIpSubnetToShrink + MaskToSize($sMaskNewSubnet) - 1;
+		$iIpBroadcastNewSubnet = $iIpSubnetToShrink + $this->MaskToSize($sMaskNewSubnet) - 1;
 		$sIpBroadcastNewSubnet = mylong2ip($iIpBroadcastNewSubnet);
 		
 		// Check that no IP range within subnet sits across future border or becomes orphean
@@ -881,7 +881,7 @@ EOF
 			break;
 		}
 		$sMaskNewSubnet = mylong2ip($iMaskNewSubnet);
-		$iIpBroadcastNewSubnet = $iIpSubnetToShrink + MaskToSize($sMaskNewSubnet) - 1;
+		$iIpBroadcastNewSubnet = $iIpSubnetToShrink + $this->MaskToSize($sMaskNewSubnet) - 1;
 		$sIpBroadcastNewSubnet = mylong2ip($iIpBroadcastNewSubnet);
 		$this->Set('mask', $sMaskNewSubnet);
 		$this->Set('broadcastip', $sIpBroadcastNewSubnet);
@@ -984,7 +984,7 @@ EOF
 			break;
 		}
 		$sMaskNewSubnet = mylong2ip($iMaskNewSubnet);
-		$iSizeNewSubnet = MaskToSize($sMaskNewSubnet);
+		$iSizeNewSubnet = $this->MaskToSize($sMaskNewSubnet);
 		
 		// Check that no IP range within subnet sits across future borders
 		$oIpRangeSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv4Range AS r WHERE r.subnet_id = $iSubnetKey"));
@@ -1048,7 +1048,7 @@ EOF
 			break;
 		}
 		$sMaskNewSubnet = mylong2ip($iMaskNewSubnet);
-		$iSizeNewSubnet = MaskToSize($sMaskNewSubnet);		
+		$iSizeNewSubnet = $this->MaskToSize($sMaskNewSubnet);		
 	
 		// Update initial subnet and register it.
 		if (!is_null($sRequestor_id))
@@ -1217,7 +1217,7 @@ EOF
 		$sMaskNewSubnet = mylong2ip($iMaskNewSubnet);
 		$iIpNewSubnet = myip2long(long2ip(ip2long(long2ip($iIpSubnetToExpand)) & ip2long(long2ip($iMaskNewSubnet))));
 		$sIpNewSubnet = mylong2ip($iIpNewSubnet);
-		$iIpBroadcastNewSubnet = $iIpNewSubnet + MaskToSize($sMaskNewSubnet) - 1;
+		$iIpBroadcastNewSubnet = $iIpNewSubnet + $this->MaskToSize($sMaskNewSubnet) - 1;
 		$sIpBroadcastNewSubnet = mylong2ip($iIpBroadcastNewSubnet);
 		
 		// Check that new subnet is fully contained within its block. If not, cancell the action
@@ -1271,7 +1271,7 @@ EOF
 		$sMaskNewSubnet = mylong2ip($iMaskNewSubnet);
 		$iIpNewSubnet = myip2long(long2ip(ip2long(long2ip($iIpSubnetToExpand)) & ip2long(long2ip($iMaskNewSubnet))));
 		$sIpNewSubnet = mylong2ip($iIpNewSubnet);
-		$iIpBroadcastNewSubnet = $iIpNewSubnet + MaskToSize($sMaskNewSubnet) - 1;
+		$iIpBroadcastNewSubnet = $iIpNewSubnet + $this->MaskToSize($sMaskNewSubnet) - 1;
 		$sIpBroadcastNewSubnet = mylong2ip($iIpBroadcastNewSubnet);
 		
 		// List subnets currently in range of new subnet and delete them all but the one newly updated one
@@ -1331,7 +1331,7 @@ EOF
 		
 		// List Subnet IPs in new subnet. Delete them all but the new subnet IP if any
 		// Creation of subnet IP is done by IPv4Subnet::AfterUpdate()
-		$sUsageNetworkIpId = GetIpUsageId($sOrgId, NETWORK_IP_CODE);
+		$sUsageNetworkIpId = IPUsage::GetIpUsageId($sOrgId, NETWORK_IP_CODE);
 		$oIpSubnetSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv4Address AS i WHERE i.usage_id = $sUsageNetworkIpId AND INET_ATON(i.ip) >= INET_ATON('$sIpNewSubnet') AND INET_ATON(i.ip) <= INET_ATON('$sIpBroadcastNewSubnet') AND i.org_id = $sOrgId"));
 		while ($oIp = $oIpSubnetSet->Fetch())
 		{
@@ -1344,7 +1344,7 @@ EOF
 		// List Gateway IPs in new subnet. Delete them all but the new broadcast IP if any
 		// Creation of broadcast IP is done by IPv4Subnet::AfterUpdate()
 		$sIpGatewayIpNewSubnet = $this->Get('gatewayip');
-		$sUsageGatewayIpId = GetIpUsageId($sOrgId, GATEWAY_IP_CODE);
+		$sUsageGatewayIpId = IPUsage::GetIpUsageId($sOrgId, GATEWAY_IP_CODE);
 		$oGatewayIPSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv4Address AS i WHERE i.usage_id = $sUsageGatewayIpId AND INET_ATON(i.ip) >= INET_ATON('$sIpNewSubnet') AND INET_ATON(i.ip) <= INET_ATON('$sIpBroadcastNewSubnet') AND i.org_id = $sOrgId"));
 		while ($oIp = $oGatewayIPSet->Fetch())
 		{
@@ -1356,7 +1356,7 @@ EOF
 		
 		// List Broadcast IPs in new subnet. Delete them all but the new broadcast IP if any
 		// Creation of broadcast IP is done by IPv4Subnet::AfterUpdate()
-		$sUsageBroadcastIpId = GetIpUsageId($sOrgId, BROADCAST_IP_CODE);
+		$sUsageBroadcastIpId = IPUsage::GetIpUsageId($sOrgId, BROADCAST_IP_CODE);
 		$oBroadcastSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv4Address AS i WHERE i.usage_id = $sUsageBroadcastIpId AND INET_ATON(i.ip) >= INET_ATON('$sIpNewSubnet') AND INET_ATON(i.ip) <= INET_ATON('$sIpBroadcastNewSubnet') AND i.org_id = $sOrgId"));
 		while ($oIp = $oBroadcastSet->Fetch())
 		{
@@ -1619,12 +1619,12 @@ EOF
 	    $sMask = $aParam['mask'];
 	    if ($sMask != '')
 	    {
-	    	$iCidr = MaskToBit($sMask);
+	    	$iCidr = $this->MaskToBit($sMask);
 	    }
 	    else
 	    {
 	    	$iCidr = $aParam['cidr'];
-	    	$sMask = BitToMask($iCidr);
+	    	$sMask = $this->BitToMask($iCidr);
 		}
 		$iIp = ip2long($sIp);
 		$iMask = ip2long($sMask);
@@ -1634,10 +1634,10 @@ EOF
 		 
 		$sWildCard = long2ip(~(ip2long($sMask)));
 		
-		$iBroadcastIp = $iSubnetIp + MaskToSize($sMask) - 1;
+		$iBroadcastIp = $iSubnetIp + $this->MaskToSize($sMask) - 1;
 		$sBroadcastIp = mylong2ip($iBroadcastIp);
 
-		$iIpNumber = MaskToSize($sMask);
+		$iIpNumber = $this->MaskToSize($sMask);
 		if ($iIpNumber > 2)
 		{
 			$iUsableHosts = $iIpNumber - 2;
@@ -1663,7 +1663,7 @@ EOF
 		}
 		else
 		{
-			$iNextSubnetIp = $iSubnetIp + MaskToSize($sMask);
+			$iNextSubnetIp = $iSubnetIp + $this->MaskToSize($sMask);
 			$sNextSubnetIp = mylong2ip($iNextSubnetIp);
 		}
 		
@@ -1814,7 +1814,7 @@ EOF
 
 		// Set Gateway IP
 		$sOrgId = $this->Get('org_id');
-		$sGatewayIPFormat = GetFromGlobalIPConfig('ipv4_gateway_ip_format', $sOrgId);
+		$sGatewayIPFormat = IPConfig::GetFromGlobalIPConfig('ipv4_gateway_ip_format', $sOrgId);
 		switch ($sGatewayIPFormat)
 		{
 			case 'subnetip_plus_1':
@@ -1940,7 +1940,7 @@ EOF
 		}
 		
 		// If allocation of Gateway Ip is free, make sure it is contained in subnet
-		$sGatewayIPFormat = GetFromGlobalIPConfig('ipv4_gateway_ip_format', $sOrgId);
+		$sGatewayIPFormat = IPConfig::GetFromGlobalIPConfig('ipv4_gateway_ip_format', $sOrgId);
 		if ($sGatewayIPFormat == 'free_setup')
 		{
 			$sGatewayIp = $this->Get('gatewayip');
@@ -1975,12 +1975,12 @@ EOF
 		$sReserveSubnetIPs = utils::ReadPostedParam('attr_reserve_subnet_IPs', '');
 		if (empty($sReserveSubnetIPs))
 		{
-			$sReserveSubnetIPs = GetFromGlobalIPConfig('reserve_subnet_IPs', $sOrgId);
+			$sReserveSubnetIPs = IPConfig::GetFromGlobalIPConfig('reserve_subnet_IPs', $sOrgId);
 		}
 		if ($sReserveSubnetIPs == 'reserve_yes')
 		{
 			// Create or update subnet IP
-			$sUsageNetworkIpId = GetIpUsageId($sOrgId, NETWORK_IP_CODE);
+			$sUsageNetworkIpId = IPUsage::GetIpUsageId($sOrgId, NETWORK_IP_CODE);
 			$oIp = MetaModel::GetObjectFromOQL("SELECT IPv4Address AS i WHERE i.ip = '$sSubnetIp' AND i.org_id = $sOrgId", null, false);
 			if (is_null($oIp))
 			{
@@ -2004,7 +2004,7 @@ EOF
 			}
 			
 			// Create or update gateway IP
-			$sUsageGatewayIpId = GetIpUsageId($sOrgId, GATEWAY_IP_CODE);
+			$sUsageGatewayIpId = IPUsage::GetIpUsageId($sOrgId, GATEWAY_IP_CODE);
 			$oIp = MetaModel::GetObjectFromOQL("SELECT IPv4Address AS i WHERE i.ip = '$sGatewayIp' AND i.org_id = $sOrgId", null, false);
 			if (is_null($oIp))
 			{
@@ -2028,7 +2028,7 @@ EOF
 			}
 
 			// Create or update broadcast IP
-			$sUsageBroadcastIpId = GetIpUsageId($sOrgId, BROADCAST_IP_CODE);
+			$sUsageBroadcastIpId = IPUsage::GetIpUsageId($sOrgId, BROADCAST_IP_CODE);
 			$oIp = MetaModel::GetObjectFromOQL("SELECT IPv4Address AS i WHERE i.ip = '$sIpBroadcast' AND i.org_id = $sOrgId", null, false);
 			if (is_null($oIp))
 			{
@@ -2077,12 +2077,12 @@ EOF
 		$sGatewayIp = $this->Get('gatewayip');
 		$sIpBroadcast = $this->Get('broadcastip');
 					
-		$sReserveSubnetIPs = GetFromGlobalIPConfig('reserve_subnet_IPs', $sOrgId);
+		$sReserveSubnetIPs = IPConfig::GetFromGlobalIPConfig('reserve_subnet_IPs', $sOrgId);
 		
 		if ($sReserveSubnetIPs == 'reserve_yes')
 		{
 			// Create or update subnet IP
-			$sUsageNetworkIpId = GetIpUsageId($sOrgId, NETWORK_IP_CODE);
+			$sUsageNetworkIpId = IPUsage::GetIpUsageId($sOrgId, NETWORK_IP_CODE);
 			$oIp = MetaModel::GetObjectFromOQL("SELECT IPv4Address AS i WHERE i.ip = '$sSubnetIp' AND i.org_id = $sOrgId", null, false);
 			if (is_null($oIp))
 			{
@@ -2106,7 +2106,7 @@ EOF
 			}
 			
 			// Create or update gateway IP
-			$sUsageGatewayIpId = GetIpUsageId($sOrgId, GATEWAY_IP_CODE);
+			$sUsageGatewayIpId = IPUsage::GetIpUsageId($sOrgId, GATEWAY_IP_CODE);
 			$oIp = MetaModel::GetObjectFromOQL("SELECT IPv4Address AS i WHERE i.ip = '$sGatewayIp' AND i.org_id = $sOrgId", null, false);
 			if (is_null($oIp))
 			{
@@ -2130,7 +2130,7 @@ EOF
 			}
 
 			// Create or update broadcast IP
-			$sUsageBroadcastIpId = GetIpUsageId($sOrgId, BROADCAST_IP_CODE);
+			$sUsageBroadcastIpId = IPUsage::GetIpUsageId($sOrgId, BROADCAST_IP_CODE);
 			$oIp = MetaModel::GetObjectFromOQL("SELECT IPv4Address AS i WHERE i.ip = '$sIpBroadcast' AND i.org_id = $sOrgId", null, false);
 			if (is_null($oIp))
 			{
@@ -2201,11 +2201,150 @@ EOF
 	 */
 	public function GetAttributeFlags($sAttCode, &$aReasons = array(), $sTargetState = '')
 	{
-		if ((!$this->IsNew()) && (($sAttCode == 'org_id') || ($sAttCode == 'block_id') || ($sAttCode == 'ip') || ($sAttCode == 'mask') || ($sAttCode == 'gatewayip') || ($sAttCode == 'broadcastip') || ($sAttCode == 'ip_occupancy') || ($sAttCode == 'range_occupancy')))
+		if ((!$this->IsNew()) && (($sAttCode == 'org_id') || ($sAttCode == 'block_id') || ($sAttCode == 'ip') || ($sAttCode == 'mask') || ($sAttCode == 'broadcastip') || ($sAttCode == 'ip_occupancy') || ($sAttCode == 'range_occupancy')))
 		{
 			return OPT_ATT_READONLY;
 		}
+		if ((!$this->IsNew()) && ($sAttCode == 'gatewayip'))
+		{
+			$sOrgId = $this->Get('org_id');
+			$sGatewayIPFormat = IPConfig::GetFromGlobalIPConfig('ipv4_gateway_ip_format', $sOrgId);
+			if ($sGatewayIPFormat != 'free_setup')
+			{
+				return OPT_ATT_READONLY;
+			}
+		}
 		return parent::GetAttributeFlags($sAttCode, $aReasons, $sTargetState);
-	}	
+	}
+	
+	/**
+	 * Functions to handle masks and sizes
+	 */
+	
+	public static function MaskToSize($Mask)
+	{
+		// Provides size of subnet according to dotted string mask
+		switch ($Mask)
+		{
+			case "0.0.0.0": return 4294967296;
+			case "128.0.0.0": return 2147483648;
+			case "192.0.0.0": return 1073741824;
+			case "224.0.0.0": return 536870912;
+			case "240.0.0.0": return 268435456;
+			case "248.0.0.0": return 134217728;
+			case "252.0.0.0": return 67108864;
+			case "254.0.0.0": return 33554432;
+			case "255.0.0.0": return 16777216;
+			case "255.128.0.0": return 8388608;
+			case "255.192.0.0": return 4194304;
+			case "255.224.0.0": return 2097152;
+			case "255.240.0.0": return 1048576;
+			case "255.248.0.0": return 524288;
+			case "255.252.0.0": return 262144;
+			case "255.254.0.0": return 131072;
+			case "255.255.0.0": return 65536;
+			case "255.255.128.0": return 32768;
+			case "255.255.192.0": return 16384;
+			case "255.255.224.0": return 8192;
+			case "255.255.240.0": return 4096;
+			case "255.255.248.0": return 2048;
+			case "255.255.252.0": return 1024;
+			case "255.255.254.0": return 512;
+			case "255.255.255.0": return 256;
+			case "255.255.255.128": return 128;
+			case "255.255.255.192": return 64;
+			case "255.255.255.224": return 32;
+			case "255.255.255.240": return 16;
+			case "255.255.255.248": return 8;
+			case "255.255.255.252": return 4;
+			case "255.255.255.254": return 2;
+			case "255.255.255.255": return 1;
+			default: return -1;
+		}
+	}
 
+	function BitToMask($iPrefix)
+	{
+		// Provides size of subnet according to dotted string mask
+		switch ($iPrefix)
+		{
+			case 0: return "0.0.0.0";
+			case 1: return "128.0.0.0";
+			case 2: return "192.0.0.0";
+			case 3: return "224.0.0.0";
+			case 4: return "240.0.0.0";
+			case 5: return "248.0.0.0";
+			case 6: return "252.0.0.0";
+			case 7: return "254.0.0.0";
+			case 8: return "255.0.0.0";
+			case 9: return "255.128.0.0";
+			case 10: return "255.192.0.0";
+			case 11: return "255.224.0.0";
+			case 12: return "255.240.0.0";
+			case 13: return "255.248.0.0";
+			case 14: return "255.252.0.0";
+			case 15: return "255.254.0.0";
+			case 16: return "255.255.0.0";
+			case 17: return "255.255.128.0";
+			case 18: return "255.255.192.0";
+			case 19: return "255.255.224.0";
+			case 20: return "255.255.240.0";
+			case 21: return "255.255.248.0";
+			case 22: return "255.255.252.0";
+			case 23: return "255.255.254.0";
+			case 24: return "255.255.255.0";
+			case 25: return "255.255.255.128";
+			case 26: return "255.255.255.192";
+			case 27: return "255.255.255.224";
+			case 28: return "255.255.255.240";
+			case 29: return "255.255.255.248";
+			case 30: return "255.255.255.252";
+			case 31: return "255.255.255.254";
+			case 32: return "255.255.255.255";
+			default: return "";
+		}
+	}
+	
+	function MaskToBit($Mask)
+	{
+		// Provides number of bits within a dotted string mask
+		return $this->SizeToBit($this->MaskToSize($Mask));
+	}
+	
+	public static function SizeToMask ($Size)
+	{
+		// Convert size of subnet into mask
+		if (($Size & ($Size - 1)) == 0)
+		{
+			//return (~($Size - 1));
+			return (sprintf("%u", ~($Size - 1)));
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
+	public static function SizeToBit($Size)
+	{
+		// Provides number of bits for a given subnet size
+		$iMask = myip2long("128.0.0.0");
+		$i = 1;
+		//while(($Size < $this->MaskToSize(mylong2ip($bitMask))) && ($i < 32))
+		while(($Size < $iMask) && ($i < 32))
+		{
+			// Needs to be reviewed for 64 bits machines
+			$iMask = $iMask >> 1;
+			$i++;
+		}
+		if ($i <= 32)
+		{
+			return $i;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+		
 }

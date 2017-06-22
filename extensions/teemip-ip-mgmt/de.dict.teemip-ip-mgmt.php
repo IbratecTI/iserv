@@ -1,5 +1,5 @@
 <?php
-// Copyright (C) 2014 TeemIp
+// Copyright (C) 2016 TeemIp
 //
 //   This file is part of TeemIp.
 //
@@ -17,8 +17,8 @@
 //   along with TeemIp. If not, see <http://www.gnu.org/licenses/>
 
 /**
- * @copyright   Copyright (C) 2014 TeemIp
- * @copyright   Copyright (C) 2014 ITOMIG GmbH (deutsche Übersetzung)
+ * @copyright   Copyright (C) 2016 TeemIp
+ * @copyright   Copyright (C) 2016 ITOMIG GmbH (deutsche Übersetzung)
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
 
@@ -26,6 +26,17 @@
 // Classes in 'Teemip-ip-Mgmt Module'
 //////////////////////////////////////////////////////////////////////
 //
+
+//
+// TeemIp specific attributes
+//
+
+Dict::Add('DE DE', 'German', 'Deutsch', array(
+	'Core:AttributeIPPercentage' => 'IP percentage',
+	'Core:AttributeIPPercentage+' => 'Graphical display for percentage of usage',
+	'Core:AttributeMacAddress' => 'MAC address',
+	'Core:AttributeMacAddress+' => 'MAC adress string',
+));
 
 //
 // Class: IPObject
@@ -434,6 +445,8 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'Class:IPAddress/Attribute:domain_name+' => 'Name of the DNS domain',
 	'Class:IPAddress/Attribute:fqdn' => 'FQDN',
 	'Class:IPAddress/Attribute:fqdn+' => 'Fully Qualified Domain Name',
+	'Class:IPAddress/Attribute:aliases' => 'Aliase',
+	'Class:IPAddress/Attribute:aliases+' => 'Liste der aliases der FQDN',
 	'Class:IPAddress/Attribute:usage_id' => 'Verwendungszweck',
 	'Class:IPAddress/Attribute:usage_id+' => '',
 	'Class:IPAddress/Attribute:usage_name' => 'Verwendungszweck',
@@ -463,12 +476,6 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'Class:IPAddress/Tab:ip_list+' => 'Liste der NAT IPs',
 	'Class:IPAddress/Tab:ci_list' => 'CIs (%1$s)',
     'Class:IPAddress/Tab:ci_list+' => 'Liste der CIs, die auf diese IP zeigen',
-	'Class:IPAddress/Tab:DatacenterDevice' => 'Datacenter Geräte (%1$s)',
-	'Class:IPAddress/Tab:DatacenterDevice+' => 'Datacenter Geräte, die diese IP als ihre Management IP verwenden: %1$s',
-	'Class:IPAddress/Tab:VirtualMachine' => 'Virtuelle Maschine (%1$s)',
-	'Class:IPAddress/Tab:VirtualMachine+' => 'Virtuelle Maschinen, die diese IP als ihre Management IP verwenden: %1$s',
-	'Class:IPAddress/Tab:IPInterface' => 'IP Interfaces (%1$s)',
-	'Class:IPAddress/Tab:IPInterface+' => 'IP Interfaces mit dieser IP: %1$s',
 	'Class:IPAddress/Tab:NoCi' => 'No CI',
 	'Class:IPAddress/Tab:NoCi+' => 'No Configuration Item is using this IP',
     'Class:IPAddress/Tab:requests' => 'IP Anfordungen (%1$s)',
@@ -542,6 +549,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'Class:IPConfig:subnetinfo' => 'Voreinstellungen der Subnetze',
 	'Class:IPConfig:iprangeinfo' => 'Voreinstellungen der IP Bereiche',
 	'Class:IPConfig:ipinfo' => 'Voreinstellungen der IPs',
+	'Class:IPConfig:otherinfo' => 'Sonstige Informationen',
 	'Class:IPConfig/Attribute:org_id' => 'Organisation',
 	'Class:IPConfig/Attribute:org_id+' => '',
 	'Class:IPConfig/Attribute:org_name' => 'Organisationsname',
@@ -556,10 +564,16 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'Class:IPConfig/Attribute:ipv4_block_min_size+' => '',
 	'Class:IPConfig/Attribute:ipv4_block_cidr_aligned' => 'Ausrichten der IPv4 Subnetz Blöcke an der CIDR',
 	'Class:IPConfig/Attribute:ipv4_block_cidr_aligned+' => '',
-	'Class:IPConfig/Attribute:ipv4_block_cidr_aligned/Value:bca_no' => 'No',
+	'Class:IPConfig/Attribute:ipv4_block_cidr_aligned/Value:bca_no' => 'Nein',
 	'Class:IPConfig/Attribute:ipv4_block_cidr_aligned/Value:bca_no+' => '',
 	'Class:IPConfig/Attribute:ipv4_block_cidr_aligned/Value:bca_yes' => 'Ja',
 	'Class:IPConfig/Attribute:ipv4_block_cidr_aligned/Value:bca_yes+' => '',
+	'Class:IPConfig/Attribute:delegate_to_children_only' => 'Der Delegation muss für eine Tochter Organisation gemacht werden',
+	'Class:IPConfig/Attribute:delegate_to_children_only+' => '',
+	'Class:IPConfig/Attribute:delegate_to_children_only/Value:dtc_no' => 'Nein',
+	'Class:IPConfig/Attribute:delegate_to_children_only/Value:dtc_no+' => '',
+	'Class:IPConfig/Attribute:delegate_to_children_only/Value:dtc_yes' => 'Ja',
+	'Class:IPConfig/Attribute:delegate_to_children_only/Value:dtc_yes+' => '',
 	'Class:IPConfig/Attribute:reserve_subnet_IPs' => 'Reservieren von Subnet, Gateway und Broadcast IPs bei Subnetz Erzeugung',
 	'Class:IPConfig/Attribute:reserve_subnet_IPs+' => '',
 	'Class:IPConfig/Attribute:reserve_subnet_IPs/Value:reserve_no' => 'Nein',
@@ -621,6 +635,8 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'Class:IPRangeUsage/Attribute:name+' => '',
 	'Class:IPRangeUsage/Attribute:description' => 'Beschreibung',
 	'Class:IPRangeUsage/Attribute:description+' => '',
+	'Class:IPRangeUsage/Attribute:ipranges_list' => 'IP Bereiche',
+	'Class:IPRangeUsage/Attribute:ipranges_list+' => '',
 ));
 
 //
@@ -638,6 +654,8 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'Class:IPUsage/Attribute:name+' => '',
 	'Class:IPUsage/Attribute:description' => 'Beschreibung',
 	'Class:IPUsage/Attribute:description+' => '',
+	'Class:IPUsage/Attribute:ips_list' => 'IP Adressen',
+	'Class:IPUsage/Attribute:ips_list+' => '',
 ));
 
 //
@@ -785,6 +803,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 
 	// Delegate action on subnet blocks
 	'UI:IPManagement:Action:Delegate:IPBlock:NoChildOrg' => 'Die Organisation des Blocks hat keine Children!',
+	'UI:IPManagement:Action:Delegate:IPBlock:NoOtherOrg' => 'Keine andere Organisation!',
 	'UI:IPManagement:Action:Delegate:IPBlock:WrongLevelOfOrganization' => 'Der Delegation Change muss für eine Schwester Organisation gemacht werden!',
 	'UI:IPManagement:Action:Delegate:IPBlock:NoChangeOfOrganization' => 'Keine Änderung notwendig!',
 	'UI:IPManagement:Action:Delegate:IPBlock:HasChildBlocks' => 'Der Block hat Children Blöcke!',
@@ -819,7 +838,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'UI:IPManagement:Action:Shrink:IPv4Block+' => '',
 	'UI:IPManagement:Action:Shrink:IPv4Block:Summary' => 'Zusammenfassung',
 	'UI:IPManagement:Action:Shrink:IPv4Block:Summary+' => '',
-	'UI:IPManagement:Action:Shrink:IPv4Block:PageTitle_Object_Class' => 'TeemIp - %1$s - %2$s verkleinern',
+	'UI:IPManagement:Action:Shrink:IPv4Block:PageTitle_Object_Class' => '%1$s - %2$s verkleinern',
 	'UI:IPManagement:Action:Shrink:IPv4Block:Title_Class_Object' => 'Shrink %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:Shrink:IPv4Block:NewFirstIP' => 'Neue erste IP des Blocks:',
 	'UI:IPManagement:Action:Shrink:IPv4Block:NewLastIP' => 'Neue Letzte IP des Blocks:',            
@@ -833,7 +852,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'UI:IPManagement:Action:Split:IPv4Block+' => '',
 	'UI:IPManagement:Action:Split:IPv4Block:Summary' => 'Zusammenfassung',
 	'UI:IPManagement:Action:Split:IPv4Block:Summary+' => '',
-	'UI:IPManagement:Action:Split:IPv4Block:PageTitle_Object_Class' => 'TeemIp - %1$s - %2$s Teilen',
+	'UI:IPManagement:Action:Split:IPv4Block:PageTitle_Object_Class' => '%1$s - %2$s Teilen',
 	'UI:IPManagement:Action:Split:IPv4Block:Title_Class_Object' => 'Teilen %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:Split:IPv4Block:At' => 'Erste IP des neuen Subnetz Blocks:',
 	'UI:IPManagement:Action:Split:IPv4Block:NameNewBlock' => 'Name des neuen Subnetz Blocks:',
@@ -847,7 +866,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'UI:IPManagement:Action:Expand:IPv4Block+' => '',
 	'UI:IPManagement:Action:Expand:IPv4Block:Summary' => 'Zusammenfassung',
 	'UI:IPManagement:Action:Expand:IPv4Block:Summary+' => '',
-	'UI:IPManagement:Action:Expand:IPv4Block:PageTitle_Object_Class' => 'TeemIp - %1$s - %2$s expand',
+	'UI:IPManagement:Action:Expand:IPv4Block:PageTitle_Object_Class' => '%1$s - %2$s expand',
 	'UI:IPManagement:Action:Expand:IPv4Block:Title_Class_Object' => 'Expand %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:Expand:IPv4Block:NewFirstIP' => 'New First IP of Block :',
 	'UI:IPManagement:Action:Expand:IPv4Block:NewLastIP' => 'New Last IP of Block :',
@@ -858,19 +877,19 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 
 	// List space action on subnet blocks 
 	'UI:IPManagement:Action:ListSpace:IPv4Block' => 'IP Raum auflisten',                                               
-	'UI:IPManagement:Action:ListSpace:IPv4Block:PageTitle_Object_Class' => 'TeemIp - %1$s - IP Raum',
+	'UI:IPManagement:Action:ListSpace:IPv4Block:PageTitle_Object_Class' => '%1$s - IP Raum',
 	'UI:IPManagement:Action:ListSpace:IPv4Block:Title_Class_Object' => 'IP Raum in %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:ListSpace:IPv4Block:FreeSpace' => 'Frei [%1$s - %2$s] - %3$s IPs - %4$.2f %%',
 	
 	// Find Space action on subnet blocks
 	'UI:IPManagement:Action:FindSpace:IPv4Block' => 'IP Raum finden',
-	'UI:IPManagement:Action:FindSpace:IPv4Block:PageTitle_Object_Class' => 'TeemIp - %1$s - IP Raum finden',
+	'UI:IPManagement:Action:FindSpace:IPv4Block:PageTitle_Object_Class' => '%1$s - IP Raum finden',
 	'UI:IPManagement:Action:FindSpace:IPv4Block:Title_Class_Object' => 'IP Raum suchen in %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:FindSpace:IPv4Block:SizeOfSpace' => 'Größe des benötigten IP Raums:',
 	'UI:IPManagement:Action:FindSpace:IPv4Block:MaxNumberOfOffers' => 'Maximal mögliche Anzahl :',
 	
 	// Do find Space action on subnet blocks
-	'UI:IPManagement:Action:DoFindSpace:IPv4Block:PageTitle_Object_Class' => 'TeemIp - %1$s - IP Raum finden',
+	'UI:IPManagement:Action:DoFindSpace:IPv4Block:PageTitle_Object_Class' => '%1$s - IP Raum finden',
 	'UI:IPManagement:Action:DoFindSpace:IPv4Block:Title_Class_Object' => 'IP Raum in den %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:DoFindSpace:IPv4Block:Summary' => '%1$s ersten /%2$s im Block',
 	'UI:IPManagement:Action:DoFindSpace:IPv4Block:CreateAsBlock' => 'Als Child Block erzeugen',
@@ -878,7 +897,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 
 	// Delegate action on subnet blocks
 	'UI:IPManagement:Action:Delegate:IPv4Block' => 'Delegieren',
-	'UI:IPManagement:Action:Delegate:IPv4Block:PageTitle_Object_Class' => 'TeemIp - %1$s - Delegieren',
+	'UI:IPManagement:Action:Delegate:IPv4Block:PageTitle_Object_Class' => '%1$s - Delegieren',
 	'UI:IPManagement:Action:Delegate:IPv4Block:Title_Class_Object' => '%1$s <span class="hilite">%2$s</span> an Child Organisation delegieren',
 	'UI:IPManagement:Action:Delegate:IPv4Block:ChildBlock' => 'Child Organisation, an die der Block delegiert werden soll:',
 	'UI:IPManagement:Action:Delegate:IPv4Block:NoChildOrg' => 'Block Organisation hast keine Kinder und kann nicht delegiert werden!',
@@ -921,14 +940,14 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	
 	// Find space action on subnets 
 	'UI:IPManagement:Action:FindSpace:IPv4Subnet' => 'IP Raum finden',
-	'UI:IPManagement:Action:FindSpace:IPv4Subnet:PageTitle_Object_Class' => 'TeemIp - %1$s - IP Raum finden',
+	'UI:IPManagement:Action:FindSpace:IPv4Subnet:PageTitle_Object_Class' => '%1$s - IP Raum finden',
 	'UI:IPManagement:Action:FindSpace:IPv4Subnet:Title_Class_Object' => 'Nach IP Raum suchen in : <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:FindSpace:IPv4Subnet:SizeTooSmall' => 'Subnetz ist zu klein für Raum Suche. Bitte abbrechen.',
 	'UI:IPManagement:Action:FindSpace:IPv4Subnet:SizeOfRange' => 'Größe des gesuchten IP Raums :',
 	'UI:IPManagement:Action:FindSpace:IPv4Subnet:MaxNumberOfOffers' => 'Maximal mögliche Anzahl :',
 	
 	// Do find Space action on subnet
-	'UI:IPManagement:Action:DoFindSpace:IPv4Subnet:PageTitle_Object_Class' => 'TeemIp - %1$s - IP Raum finden',
+	'UI:IPManagement:Action:DoFindSpace:IPv4Subnet:PageTitle_Object_Class' => '%1$s - IP Raum finden',
 	'UI:IPManagement:Action:DoFindSpace:IPv4Subnet:Title_Class_Object' => 'nach IP Raum suchen in %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:DoFindSpace:IPv4Subnet:Summary' => '%1$s die ersten freien %2$s IPs Räume im Subnetz',
 	'UI:IPManagement:Action:DoFindSpace:IPv4Subnet:RangeTooBig' => 'Die angeforderte Raumgröße passt nicht in das Subnetz. Bitte erneut mit einem kleineren Wert versuchen.',
@@ -936,7 +955,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 
 	// List IPs action on subnets 
 	'UI:IPManagement:Action:ListIps:IPv4Subnet' => 'IPs auflisten und auswählen',                                               
-	'UI:IPManagement:Action:ListIps:IPv4Subnet:PageTitle_Object_Class' => 'TeemIp - %1$s - IPs',
+	'UI:IPManagement:Action:ListIps:IPv4Subnet:PageTitle_Object_Class' => '%1$s - IPs',
 	'UI:IPManagement:Action:ListIps:IPv4Subnet:Title_Class_Object' => 'Liste von IPs in %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:ListIps:IPv4Subnet:Subtitle_ListRange' => 'Subnetz ist zu groß, um alle IPs aufzulisten. Bitte ein anzuzeigendes Intervall auswählen:',                                               
 	'UI:IPManagement:Action:ListIps:IPv4Subnet:FirstIP' => 'Erste IP in der Liste',                                               
@@ -944,7 +963,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	
 	// Do list IPs action on subnet
 	'UI:IPManagement:Action:DoListIps:IPv4Subnet' => 'IPs auflisten und auswählen',                                               
-	'UI:IPManagement:Action:DoListIps:IPv4Subnet:PageTitle_Object_Class' => 'TeemIp - %1$s - IPs',
+	'UI:IPManagement:Action:DoListIps:IPv4Subnet:PageTitle_Object_Class' => '%1$s - IPs',
 	'UI:IPManagement:Action:DoListIps:IPv4Subnet:Title_Class_Object' => 'Teilliste von IPs in %1$s: <span class="hilite">%2$s</span>',
  	'UI:IPManagement:Action:DoListIps:IPv4Subnet:CannotBeListed' => 'IPs können nicht angezeigt werden in der Liste: %1$s',
 	'UI:IPManagement:Action:DoListIps:IPv4Subnet:FirstIPOutOfSubnet' => 'Erste IP ist außerhalb vom Subnetz!',
@@ -956,7 +975,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'UI:IPManagement:Action:Shrink:IPv4Subnet+' => '',
 	'UI:IPManagement:Action:Shrink:IPv4Subnet:Summary' => 'Zusammenfassung',
 	'UI:IPManagement:Action:Shrink:IPv4Subnet:Summary+' => '',
-	'UI:IPManagement:Action:Shrink:IPv4Subnet:PageTitle_Object_Class' => 'TeemIp - %1$s - %2$s verkleinern',
+	'UI:IPManagement:Action:Shrink:IPv4Subnet:PageTitle_Object_Class' => '%1$s - %2$s verkleinern',
 	'UI:IPManagement:Action:Shrink:IPv4Subnet:Title_Class_Object' => 'Verkleinern %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:Shrink:IPv4Subnet:CannotBeShrunk' =>  'Subnetz kann nicht verkleinert werden: %1$s',
 	'UI:IPManagement:Action:Shrink:IPv4Subnet:SizeTooSmall' => 'Subnetz ist zu klein zum Verkleinern!',
@@ -971,7 +990,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'UI:IPManagement:Action:Split:IPv4Subnet+' => '',
 	'UI:IPManagement:Action:Split:IPv4Subnet:Summary' => 'Zusammenfassung',
 	'UI:IPManagement:Action:Split:IPv4Subnet:Summary+' => '',
-	'UI:IPManagement:Action:Split:IPv4Subnet:PageTitle_Object_Class' => 'TeemIp - %1$s - %2$s Teilen',
+	'UI:IPManagement:Action:Split:IPv4Subnet:PageTitle_Object_Class' => '%1$s - %2$s Teilen',
 	'UI:IPManagement:Action:Split:IPv4Subnet:Title_Class_Object' => 'Teilen %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:Split:IPv4Subnet:CannotBeSplit' =>  'Subnetz kann nicht geteilt werden: %1$s',
 	'UI:IPManagement:Action:Split:IPv4Subnet:SizeTooSmall' => 'Subnetz ist zu klein zum Teilen!',
@@ -985,7 +1004,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'UI:IPManagement:Action:Expand:IPv4Subnet+' => '',
 	'UI:IPManagement:Action:Expand:IPv4Subnet:Summary' => 'Zusammenfassung',
 	'UI:IPManagement:Action:Expand:IPv4Subnet:Summary+' => '',
-	'UI:IPManagement:Action:Expand:IPv4Subnet:PageTitle_Object_Class' => 'TeemIp - %1$s - %2$s Vergrößern',
+	'UI:IPManagement:Action:Expand:IPv4Subnet:PageTitle_Object_Class' => '%1$s - %2$s Vergrößern',
 	'UI:IPManagement:Action:Expand:IPv4Subnet:Title_Class_Object' => 'Vergrößern %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:Expand:IPv4Subnet:CannotBeExpanded' =>  'Subnetz kann nicht vergrößert werden: %1$s',
 	'UI:IPManagement:Action:Expand:IPv4Subnet:SizeTooBig' => 'Subnetz ist zu groß zum Vergrößern!',
@@ -996,7 +1015,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 
 	// CSV Export action on subnets
 	'UI:IPManagement:Action:CsvExportIps:IPv4Subnet' => 'CSV Export IPs',
-	'UI:IPManagement:Action:CsvExportIps:IPv4Subnet:PageTitle_Object_Class' => 'TeemIp - %1$s - %2$s CSV Export von IPs',
+	'UI:IPManagement:Action:CsvExportIps:IPv4Subnet:PageTitle_Object_Class' => '%1$s - %2$s CSV Export von IPs',
 	'UI:IPManagement:Action:CsvExportIps:IPv4Subnet:Title_Class_Object' => 'CSV Export IPs von %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:CsvExportIps:IPv4Subnet:Subtitle_ListRange' => 'Subnetz ist zu groß, um alle IPs auf einmal zu exportieren. Bitte einen Unterbereich auswählen:',                                               
 	'UI:IPManagement:Action:CsvExportIps:IPv4Subnet:FirstIP' => 'Erste IP der Liste',                                               
@@ -1004,7 +1023,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	
 	// Do CSV export IPs action on subnet
 	'UI:IPManagement:Action:DoCsvExportIps:IPv4Subnet' => 'CSV Export IPs',                                               
-	'UI:IPManagement:Action:DoCsvExportIps:IPv4Subnet:PageTitle_Object_Class' => 'TeemIp - %1$s - %2$s CSV Export von IPs',
+	'UI:IPManagement:Action:DoCsvExportIps:IPv4Subnet:PageTitle_Object_Class' => '%1$s - %2$s CSV Export von IPs',
 	'UI:IPManagement:Action:DoCsvExportIps:IPv4Subnet:Title_Class_Object' => 'Partieller CSV Export von IPs in %1$s: <span class="hilite">%2$s</span>',
  	'UI:IPManagement:Action:DoCsvExportIps:IPv4Subnet:CannotBeListed' => 'IPs können nicht gelistet werden: %1$s',
 	'UI:IPManagement:Action:DoCsvExportIps:IPv4Subnet:FirstIPOutOfSubnet' => 'Die erste IP ist ausserhalb des Subnetzes!',
@@ -1013,7 +1032,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 
 	// Subnet calculator
 	'UI:IPManagement:Action:Calculator:IPv4Subnet' => 'Subnetz Rechner',
-	'UI:IPManagement:Action:Calculator:IPv4Subnet:PageTitle_Object_Class' => 'TeemIp - %2$s Rechner',
+	'UI:IPManagement:Action:Calculator:IPv4Subnet:PageTitle_Object_Class' => '%2$s Rechner',
 	'UI:IPManagement:Action:Calculator:IPv4Subnet:Title_Class_Object' => 'Rechner für %1$s',
 	'UI:IPManagement:Action:Calculator:IPv4Subnet:IP' => 'IP Adresse',
 	'UI:IPManagement:Action:Calculator:IPv4Subnet:Mask' => 'Maske',
@@ -1021,7 +1040,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 
 	// Do Subnet calculator
 	'UI:IPManagement:Action:DoCalculator:IPv4Subnet' => 'Subnetz Rechner',
-	'UI:IPManagement:Action:DoCalculator:IPv4Subnet:PageTitle_Object_Class' => 'TeemIp - %2$s Rechner',
+	'UI:IPManagement:Action:DoCalculator:IPv4Subnet:PageTitle_Object_Class' => '%2$s Rechner',
 	'UI:IPManagement:Action:DoCalculator:IPv4Subnet:Title_Class_Object' => '%1$s - Ergebnis des Rechners',
 	'UI:IPManagement:Action:DoCalculator:IPv4Subnet:IP' => 'IP Adresse',
 	'UI:IPManagement:Action:DoCalculator:IPv4Subnet:Mask' => 'Maske',
@@ -1061,7 +1080,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 
 	// List IPs action on IP Ranges 
 	'UI:IPManagement:Action:ListIps:IPv4Range' => 'IPs auflisten und auswählen',                                               
-	'UI:IPManagement:Action:ListIps:IPv4Range:PageTitle_Object_Class' => 'TeemIp - %1$s - IPs',
+	'UI:IPManagement:Action:ListIps:IPv4Range:PageTitle_Object_Class' => '%1$s - IPs',
 	'UI:IPManagement:Action:ListIps:IPv4Range:Title_Class_Object' => 'Liste von IPs in %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:ListIps:IPv4Range:Subtitle_ListRange' => 'Bereich ist zu groß, um alle IPs aufzulisten. Bitte kleineren Bereich auswählen:',                                               
 	'UI:IPManagement:Action:ListIps:IPv4Range:FirstIP' => 'Erste IP der Liste',                                               
@@ -1069,7 +1088,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 		
 	// Do list IPs action on IP Ranges 
 	'UI:IPManagement:Action:DoListIps:IPv4Range' => 'IPs auflisten und auswählen',                                              
-	'UI:IPManagement:Action:DoListIps:IPv4Range:PageTitle_Object_Class' => 'TeemIp - %1$s - IPs',
+	'UI:IPManagement:Action:DoListIps:IPv4Range:PageTitle_Object_Class' => '%1$s - IPs',
 	'UI:IPManagement:Action:DoListIps:IPv4Range:Title_Class_Object' => 'Partielle Liste der IPs in %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:DoListIps:IPv4Range:CannotBeListed' => 'Bereich kann nicht aufgelistet werden: %1$s',
 	'UI:IPManagement:Action:DoListIps:IPv4Range:FirstIPOutOfRange' => 'Erste IP ausserhalb des Bereichs!',
@@ -1078,7 +1097,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 
 	// CSV Export action on IP Ranges
 	'UI:IPManagement:Action:CsvExportIps:IPv4Range' => 'CSV Export von IPs',
-	'UI:IPManagement:Action:CsvExportIps:IPv4Range:PageTitle_Object_Class' => 'TeemIp - %1$s - %2$s CSV Export von IPs',
+	'UI:IPManagement:Action:CsvExportIps:IPv4Range:PageTitle_Object_Class' => '%1$s - %2$s CSV Export von IPs',
 	'UI:IPManagement:Action:CsvExportIps:IPv4Range:Title_Class_Object' => 'CSV Export der IPs von %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:CsvExportIps:IPv4Range:Subtitle_ListRange' => 'Bereich ist zum groß, um alle IPs gleichzeitig zu exportieren. Btte einen Unterbereich auswählen:',                                               
 	'UI:IPManagement:Action:CsvExportIps:IPv4Range:FirstIP' => 'Erste IP der Liste',                                               
@@ -1086,7 +1105,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	
 	// Do CSV Export IPs action on IP Ranges
 	'UI:IPManagement:Action:DoCsvExportIps:IPv4Range' => 'CSV Export von IPs',                                               
-	'UI:IPManagement:Action:DoCsvExportIps:IPv4Range:PageTitle_Object_Class' => 'TeemIp - %1$s - %2$s CSV Export von IPs',
+	'UI:IPManagement:Action:DoCsvExportIps:IPv4Range:PageTitle_Object_Class' => '%1$s - %2$s CSV Export von IPs',
 	'UI:IPManagement:Action:DoCsvExportIps:IPv4Range:Title_Class_Object' => 'Partieller CSV Export der IPs von %1$s: <span class="hilite">%2$s</span>',
 	'UI:IPManagement:Action:DoCsvExportIps:IPv4Range:CannotBeListed' => 'Bereich kann nicht exportiert werden: %1$s',
 	'UI:IPManagement:Action:DoCsvExportIps:IPv4Range:FirstIPOutOfRange' => 'Erste IP ausserhalb des Bereichs!',

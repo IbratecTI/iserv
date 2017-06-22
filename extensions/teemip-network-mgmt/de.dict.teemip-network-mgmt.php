@@ -101,6 +101,7 @@ Dict::Add('DE DE', 'German', 'Deutsch', array(
 	'Class:WANLink:baseinfo' => 'Allgemeine Informationen',
 	'Class:WANLink:networkinfo' => 'Netzwerk Informationen',
 	'Class:WANLink:admininfo' => 'Administrative Informationen',
+	'Class:WANLink:locationinfo' => 'Standorte',
 	'Class:WANLink:dateinfo' => 'Datum Informationen',
 	'Class:WANLink/Attribute:type_id' => 'Typ',
 	'Class:WANLink/Attribute:type_id+' => '',

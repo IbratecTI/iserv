@@ -64,7 +64,7 @@ class _IPv4Block extends IPBlock
 		if (empty($iBlockMinSize))
 		{
 			$sOrgId = $this->Get('org_id');
-			$iBlockMinSize = GetFromGlobalIPConfig('ipv4_block_min_size', $sOrgId);
+			$iBlockMinSize = IPConfig::GetFromGlobalIPConfig('ipv4_block_min_size', $sOrgId);
 		}
 		else
 		{
@@ -120,7 +120,7 @@ class _IPv4Block extends IPBlock
 	 */
 	public function GetFreeSpace($iSize, $iMaxOffer)
 	{
-		$bitMask = SizeToMask($iSize);
+		$bitMask = IPv4Subnet::SizeToMask($iSize);
 		$sOrgId = $this->Get('org_id');
 		$iKey = $this->GetKey();
 		$aFreeSpace = array();
@@ -243,7 +243,7 @@ class _IPv4Block extends IPBlock
 		if (empty($sBlockCidrAligned))
 		{
 			$sOrgId = $this->Get('org_id');
-			$sBlockCidrAligned = GetFromGlobalIPConfig('ipv4_block_cidr_aligned', $sOrgId);
+			$sBlockCidrAligned = IPConfig::GetFromGlobalIPConfig('ipv4_block_cidr_aligned', $sOrgId);
 		}
 		if ($sBlockCidrAligned == 'bca_yes')
 		{
@@ -257,7 +257,7 @@ class _IPv4Block extends IPBlock
 			} 
 			// Check that FirstIp is CIDR aligned
 			// Call to ip2long(long2ip()) is a workaround to handle integers that are above their max size
-			$iMask = SizeToMask($Size);
+			$iMask = IPv4Subnet::SizeToMask($Size);
 			if ((ip2long(long2ip($iFirstIp)) & ip2long(long2ip($iMask))) != ip2long(long2ip($iFirstIp)))
 			{
 				return false;
@@ -333,7 +333,7 @@ class _IPv4Block extends IPBlock
 		$iId = $this->GetKey();
 		$sOrgId = $this->Get('org_id');
 		$iSize = $sParameter['spacesize'];
-		$bitMask = SizeToMask($iSize);
+		$bitMask = IPv4Subnet::SizeToMask($iSize);
 		$iMaxOffer = $sParameter['maxoffer'];
 		$sStatusSubnet = $sParameter['status_subnet'];
 		$sType = $sParameter['type'];
@@ -354,7 +354,7 @@ class _IPv4Block extends IPBlock
 			
 		// Display Summary of parameters
 		$oP->add("<ul>\n");
-		$oP->add("<li>"."&nbsp;".Dict::Format('UI:IPManagement:Action:DoFindSpace:IPv4Block:Summary', $iMaxOffer, SizeToBit($iSize))."<ul>\n");
+		$oP->add("<li>"."&nbsp;".Dict::Format('UI:IPManagement:Action:DoFindSpace:IPv4Block:Summary', $iMaxOffer, IPv4Subnet::SizeToBit($iSize))."<ul>\n");
 		
 		// Display possible choices as list
 		$iSizeFreeArray = sizeof ($aFreeSpace);
@@ -922,11 +922,11 @@ EOF
 		$sLastIpBlockToDel = $this->Get('lastip');
 		$iLastIpBlockToDel = myip2long($sLastIpBlockToDel);
 		$iChildOrgId = $aParam['child_org_id'];
-
-		// If block is already delegated, 
+		$sDelegateToChildrenOnly = IPConfig::GetFromGlobalIPConfig('delegate_to_children_only', $iOrgId);
+		
+		// If block should be delegated to children only and if it's already delegated, 
 		// 	Make sure redelegation is done at the same level of organization.
-		//  Make sure that new child organization is different from the current one
-		if ($this->Get('parent_org_id') != 0)
+		if (($sDelegateToChildrenOnly == 'dtc_yes') && ($this->Get('parent_org_id') != 0))
 		{
 			$oBlockOrg = MetaModel::GetObject('Organization', $iOrgId, true /* MustBeFound */);
 			$oChildBlockOrg = MetaModel::GetObject('Organization', $iChildOrgId, true /* MustBeFound */);
@@ -934,12 +934,13 @@ EOF
 			{
 				return (Dict::Format('UI:IPManagement:Action:Delegate:IPBlock:WrongLevelOfOrganization'));
 			}
+		}
 			
-			if ($iChildOrgId == $iOrgId)
-			{
-				return (Dict::Format('UI:IPManagement:Action:Delegate:IPBlock:NoChangeOfOrganization'));
-			}
-		} 
+		//  Make sure that new child organization is different from the current one
+		if ($iChildOrgId == $iOrgId)
+		{
+			return (Dict::Format('UI:IPManagement:Action:Delegate:IPBlock:NoChangeOfOrganization'));
+		}
 		
 		// Make sure block has no children blocks and no children subnets
 		$oChildrenBlockSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv4Block AS b WHERE b.parent_id = $iBlockId"));
@@ -1116,12 +1117,12 @@ EOF
 				// Compute max possible 'CIDR aligned' space to look for, 
 				//	1. Search space that can fit in block only
 				$iBlockSize = $this->GetBlockSize();
-				$iMaxSize = MaskToSize("192.0.0.0");
+				$iMaxSize = IPv4Subnet::MaskToSize("192.0.0.0");
 				while($iBlockSize <= $iMaxSize)
 				{
 					$iMaxSize /= 2;
 				}
-				$bitMask = SizeToMask($iMaxSize);
+				$bitMask = IPv4Subnet::SizeToMask($iMaxSize);
 				//	2. Make sure block holds space of $iMaxSize CIDR aligned
 				$iFirstIp = myip2long($this->Get('firstip'));
 				$iLastIp = myip2long($this->Get('lastip'));
@@ -1134,7 +1135,7 @@ EOF
 						$bitMask = $bitMask >> 1;      
 					}
 				}
-				$i = SizeToBit($iMaxSize);
+				$i = IPv4Subnet::SizeToBit($iMaxSize);
 				if ($i < 16)
 				{
 					$iDefaultMask = 16;
@@ -1151,7 +1152,7 @@ EOF
 				$sAttCode = 'spacesize';
 				$sInputId = $iFormId.'_'.'spacesize';
 				$sHTMLValue = "<select id=\"$sInputId\" name=\"spacesize\">\n";
-				$InputSize = MaskToSize(mylong2ip($bitMask));
+				$InputSize = IPv4Subnet::MaskToSize(mylong2ip($bitMask));
 				while($i <= 31)
 				{
 					if ($i == $iDefaultMask)
@@ -1163,7 +1164,7 @@ EOF
 						$sHTMLValue .= "<option value=\"$InputSize\">".mylong2ip($bitMask)." /$i</option>\n";
 					}
 					$InputSize /= 2;
-					$bitMask = SizeToMask($InputSize);
+					$bitMask = IPv4Subnet::SizeToMask($InputSize);
 					$i++;
 				}
 				$sHTMLValue .= "</select>";	
@@ -1240,18 +1241,28 @@ EOF
 			case 'delegate':
 				$sLabelOfAction1 = Dict::S('UI:IPManagement:Action:Delegate:IPv4Block:ChildBlock');
 			
-				// Get block's children (list should not be empty at this stage)
 				$iOrgId = $this->Get('org_id');
 				$iCurrentParentOrgId = $this->Get('parent_org_id');
-				// If block has already been delegated, delegation can be changed but to sister organization (same level)
-				// If not, block can be delegated to child organization
-				if ($iCurrentParentOrgId != 0)
+				$sDelegateToChildrenOnly = IPConfig::GetFromGlobalIPConfig('delegate_to_children_only', $iOrgId);
+				if ($sDelegateToChildrenOnly == 'dtc_yes')
 				{
-					$oChildOrgSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT Organization AS o WHERE o.parent_id = $iCurrentParentOrgId"));
+					// Block can only be delegated to children organization
+					// Get block's children (list should not be empty at this stage)
+					// If block has already been delegated, delegation can be changed but to sister organization (same level)
+					// If not, block can be delegated to child organization
+					if ($iCurrentParentOrgId != 0)
+					{
+						$oChildOrgSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT Organization AS o WHERE o.parent_id = $iCurrentParentOrgId"));
+					}
+					else
+					{
+						$oChildOrgSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT Organization AS o WHERE o.parent_id = $iOrgId"));
+					}
 				}
-				else
+				else 
 				{
-					$oChildOrgSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT Organization AS o WHERE o.parent_id = $iOrgId"));
+					// Block can be delegated to any organization
+					$oChildOrgSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT Organization AS o WHERE o.id != $iOrgId"));
 				}
 
 				// Display list of choices now
@@ -1499,7 +1510,7 @@ EOF
 		if ($this->IsNew())
 		{
 			// Check that 1st IP is smaller than last one
-			if ($iFirstIp >= $iLastIp)
+			if ($iFirstIp > $iLastIp)
 			{
 				$this->m_aCheckIssues[] = Dict::Format('UI:IPManagement:Action:New:IPBlock:Reverted');
 				return;
@@ -1544,6 +1555,11 @@ EOF
 			//		If no parent is specified (null), then check is done with all such blocks with null parent specified.
 			//		It is done on blocks belonging to the same parent otherwise
 			$oSRangeSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv4Block AS b WHERE b.parent_id = '$iParentId' AND (b.org_id = $sOrgId OR b.parent_org_id = $sOrgId) AND b.id != '$iKey'"));
+			if ($iParentId == 0)
+			{
+				$oSRangeSet2 = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv4Block AS b WHERE b.parent_org_id != 0 AND b.org_id = $sOrgId AND b.id != '$iKey'"));
+				$oSRangeSet->Append($oSRangeSet2);
+			}
 			while ($oSRange = $oSRangeSet->Fetch())
 			{
 				$iCurrentFirstIp = myip2long($oSRange->Get('firstip'));

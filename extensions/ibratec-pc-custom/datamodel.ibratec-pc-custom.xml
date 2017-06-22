@@ -37,27 +37,8 @@
     </class> 
     <class id="Model">
       <fields>
-         <field id="type" xsi:type="AttributeEnum" _delta="redefine">
+         <field id="type" xsi:type="AttributeEnum" _delta="merge">
           <values>
-            <value id="NetworkDevice">NetworkDevice</value>
-            <value id="Server">Server</value>
-            <value id="SANSwitch">SANSwitch</value>
-            <value id="StorageSystem">StorageSystem</value>
-            <value id="Rack">Rack</value>
-            <value id="Enclosure">Enclosure</value>
-            <value id="PC">PC</value>
-            <value id="Tablet">Tablet</value>
-            <value id="Phone">Phone</value>
-            <value id="MobilePhone">MobilePhone</value>
-            <value id="Printer">Printer</value>
-            <value id="DiskArray">DiskArray</value>
-            <value id="NAS">NAS</value>
-            <value id="TapeLibrary">TapeLibrary</value>
-            <value id="IPPhone">IPPhone</value>
-            <value id="Peripheral">Peripheral</value>
-            <value id="PowerSource">PowerSource</value>
-            <value id="PDU">PDU</value>
-            <value id="Monitor">Monitor</value>
             <value id="AutoTransferSwitch">AutoTransferSwitch</value>
           </values>
           <sql>type</sql>
@@ -67,22 +48,8 @@
         </field>
       </fields>
    </class>
-    <class id="Printer">
+    <class id="Printer" _delta="merge">
       <fields>
-        <field id="managementip_id" xsi:type="AttributeExternalKey" _delta="define">
-          <filter><![CDATA[SELECT IPAddress AS ip WHERE (ip.status != 'allocated' OR ip.id = :this->managementip_id) AND ip.org_id = :this->org_id]]></filter>
-          <dependencies>
-            <attribute id="org_id"/>
-         </dependencies>
-          <sql>managementip_id</sql>
-          <is_null_allowed>true</is_null_allowed>
-          <target_class>IPAddress</target_class>
-          <on_target_delete>DEL_MANUAL</on_target_delete>
-        </field>
-        <field id="managementip_name" xsi:type="AttributeExternalField" _delta="define">
-          <extkey_attcode>managementip_id</extkey_attcode>
-          <target_attcode>fqdn</target_attcode>
-        </field>
         <field id="asset" xsi:type="AttributeEnum" _delta="define">
           <values>
             <value id="own">own</value>
@@ -93,190 +60,18 @@
           <is_null_allowed>no</is_null_allowed>
         </field>
        </fields>
-       <methods>
-        <method id="AfterInsert" _delta="define">
-          <comment/>
-          <static>false</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[       public function AfterInsert()
-    {
-                parent::AfterInsert();
-
-                $iIpId = $this->Get('managementip_id');
-                if ($iIpId != null)
-                {
-                        $oIP = MetaModel::GetObject('IPAddress', $iIpId, false /* MustBeFound */);
-                        if (!is_null($oIP))
-                        {
-                                $oIP->Set('status', 'allocated');
-                                $oIP->DBUpdate();
-                        }
-                }
-        }]]></code>
-        </method>
-        <method id="AfterUpdate" _delta="define">
-          <comment/>
-          <static>false</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[       public function AfterUpdate()
-    {
-                parent::AfterUpdate();
-
-                $iIpId = $this->Get('managementip_id');
-                $iPreviousIpId = $this->GetOriginal('managementip_id');
-                if ($iIpId != $iPreviousIpId)
-                {
-                        if ($iIpId != null)
-                        {
-                                $oIP = MetaModel::GetObject('IPAddress', $iIpId, false /* MustBeFound */);
-                                if ($oIP != null)
-                                {
-                                        if ($oIP->Get('status') != 'allocated')
-                                        {
-                                                $oIP->Set('status', 'allocated');
-                                                $oIP->DBUpdate();
-                                        }
-                                }
-                        }
-                        if ($iPreviousIpId != null)
-                        {
-                                $oIP = MetaModel::GetObject('IPAddress', $iPreviousIpId, false /* MustBeFound */);
-                                if ($oIP != null)
-                                {
-                                        if ($oIP->Get('status') == 'allocated')
-                                        {
-                                                $oIP->Set('status', 'unassigned');
-                                                $oIP->DBUpdate();
-                                        }
-                                }
-                        }
-                }
-        }]]></code>
-        </method>
-        <method id="OnDelete" _delta="define">
-          <comment/>
-          <static>false</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[       public function OnDelete()
-    {
-                parent::OnDelete();
-
-                $iIpId = $this->Get('managementip_id');
-                if ($iIpId != null)
-                {
-                        $oIP = MetaModel::GetObject('IPAddress', $iIpId, false /* MustBeFound */);
-                        if ($oIP != null)
-                        {
-                                if ($oIP->Get('status') == 'allocated')
-                                {
-                                        $oIP->Set('status', 'unassigned');
-                                        $oIP->DBUpdate();
-                                }
-                        }
-                }
-        }]]></code>
-        </method>
-       </methods>
        <presentation>
         <details>
           <items>
-            <item id="contacts_list">
-              <rank>10</rank>
-            </item>
-            <item id="documents_list">
-              <rank>20</rank>
-            </item>
-            <item id="tickets_list">
-              <rank>30</rank>
-            </item>
-            <item id="physicalinterface_list">
-              <rank>40</rank>
-            </item>
-            <item id="networkdevice_list">
-              <rank>50</rank>
-            </item>
-            <item id="providercontracts_list">
-              <rank>60</rank>
-            </item>
-            <item id="services_list">
-              <rank>70</rank>
-            </item>
             <item id="col:col1">
-              <rank>80</rank>
               <items>
-                <item id="fieldset:Server:baseinfo">
-                  <rank>10</rank>
-                  <items>
-                    <item id="name">
-                      <rank>10</rank>
-                    </item>
-                    <item id="org_id">
-                      <rank>20</rank>
-                    </item>
-                    <item id="status">
-                      <rank>30</rank>
-                    </item>
-                    <item id="business_criticity">
-                      <rank>40</rank>
-                    </item>
-                    <item id="location_id">
-                      <rank>50</rank>
-                    </item>
-                  </items>
-                </item>
                 <item id="fieldset:Server:moreinfo">
-                  <rank>20</rank>
-                  <items>
-                    <item id="brand_id">
-                      <rank>10</rank>
-                    </item>
-                    <item id="model_id">
-                      <rank>20</rank>
-                    </item>
-                    <item id="serialnumber">
-                      <rank>30</rank>
-                    </item>
+                  <items _delta="merge">
                     <item id="asset">
                       <rank>35</rank>
                     </item>
-                    <item id="asset_number">
-                      <rank>40</rank>
-                    </item>
-                    <item id="managementip_id">
-                      <rank>50</rank>
-                    </item>
                     <item id="powerconsumption">
-                      <rank>60</rank>
-                    </item>
-                  </items>
-                </item>
-              </items>
-            </item>
-            <item id="col:col2">
-              <rank>90</rank>
-              <items>
-                <item id="fieldset:Server:Date">
-                  <rank>10</rank>
-                  <items>
-                    <item id="move2production">
-                      <rank>10</rank>
-                    </item>
-                    <item id="purchase_date">
-                      <rank>20</rank>
-                    </item>
-                    <item id="end_of_warranty">
-                      <rank>30</rank>
-                    </item>
-                  </items>
-                </item>
-                <item id="fieldset:Server:otherinfo">
-                  <rank>20</rank>
-                  <items>
-                    <item id="description">
-                      <rank>10</rank>
+                      <rank>65</rank>
                     </item>
                   </items>
                 </item>
@@ -295,20 +90,6 @@
     </class>
     <class id="PC">
       <fields>
-        <field id="managementip_id" xsi:type="AttributeExternalKey" _delta="define">
-          <filter><![CDATA[SELECT ip FROM Organization AS child JOIN Organization AS root ON child.parent_id = root.id  JOIN IPAddress AS ip ON ip.org_id=root.id WHERE child.id=:this->org_id AND (ip.status != 'allocated' OR ip.id = :this->managementip_id) AND ip.org_id =root.id]]></filter>
-          <dependencies>
-            <attribute id="org_id"/>
-         </dependencies>
-          <sql>managementip_id</sql>
-          <is_null_allowed>true</is_null_allowed>
-          <target_class>IPAddress</target_class>
-          <on_target_delete>DEL_MANUAL</on_target_delete>
-        </field>
-        <field id="managementip_name" xsi:type="AttributeExternalField" _delta="define">
-          <extkey_attcode>managementip_id</extkey_attcode>
-          <target_attcode>fqdn</target_attcode>
-        </field>
         <field id="power_id" xsi:type="AttributeExternalKey" _delta="define">
           <filter><![CDATA[SELECT PowerConnection WHERE location_id= :this->location_id]]></filter>
           <dependencies>
@@ -324,7 +105,6 @@
           <extkey_attcode>power_id</extkey_attcode>
           <target_attcode>name</target_attcode>
         </field>
-
         <field id="brandmon_id" xsi:type="AttributeExternalKey" _delta="define">
           <sql>brandmon_id</sql>
           <target_class>Brand</target_class>
@@ -381,91 +161,6 @@
 
       </fields>
       <methods>
-        <method id="AfterInsert" _delta="define">
-          <comment/>
-          <static>false</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[       public function AfterInsert()
-    {
-                parent::AfterInsert();
-
-                $iIpId = $this->Get('managementip_id');
-                if ($iIpId != null)
-                {
-                        $oIP = MetaModel::GetObject('IPAddress', $iIpId, false /* MustBeFound */);
-                        if (!is_null($oIP))
-                        {
-                                $oIP->Set('status', 'allocated');
-                                $oIP->DBUpdate();
-                        }
-                }
-        }]]></code>
-        </method>
-        <method id="AfterUpdate" _delta="define">
-          <comment/>
-          <static>false</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[       public function AfterUpdate()
-    {
-                parent::AfterUpdate();
-
-                $iIpId = $this->Get('managementip_id');
-                $iPreviousIpId = $this->GetOriginal('managementip_id');
-                if ($iIpId != $iPreviousIpId)
-                {
-                        if ($iIpId != null)
-                        {
-                                $oIP = MetaModel::GetObject('IPAddress', $iIpId, false /* MustBeFound */);
-                                if ($oIP != null)
-                                {
-                                        if ($oIP->Get('status') != 'allocated')
-                                        {
-                                                $oIP->Set('status', 'allocated');
-                                                $oIP->DBUpdate();
-                                        }
-                                }
-                        }
-                        if ($iPreviousIpId != null)
-                        {
-                                $oIP = MetaModel::GetObject('IPAddress', $iPreviousIpId, false /* MustBeFound */);
-                                if ($oIP != null)
-                                {
-                                        if ($oIP->Get('status') == 'allocated')
-                                        {
-                                                $oIP->Set('status', 'unassigned');
-                                                $oIP->DBUpdate();
-                                        }
-                                }
-                        }
-                }
-        }]]></code>
-        </method>
-        <method id="OnDelete" _delta="define">
-          <comment/>
-          <static>false</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[       public function OnDelete()
-    {
-                parent::OnDelete();
-
-                $iIpId = $this->Get('managementip_id');
-                if ($iIpId != null)
-                {
-                        $oIP = MetaModel::GetObject('IPAddress', $iIpId, false /* MustBeFound */);
-                        if ($oIP != null)
-                        {
-                                if ($oIP->Get('status') == 'allocated')
-                                {
-                                        $oIP->Set('status', 'unassigned');
-                                        $oIP->DBUpdate();
-                                }
-                        }
-                }
-        }]]></code>
-        </method>
         <method id="GetRelationQueries" _delta="define">
           <static>true</static>
           <access>public</access>
@@ -495,130 +190,35 @@
       <presentation>
         <details>
           <items>
-            <item id="softwares_list">
-              <rank>5</rank>
-            </item>
-            <item id="contacts_list">
-              <rank>10</rank>
-            </item>
-            <item id="documents_list">
-              <rank>20</rank>
-            </item>
-            <item id="tickets_list">
-              <rank>30</rank>
-            </item>
-            <item id="physicalinterface_list">
-              <rank>40</rank>
-            </item>
-            <item id="networkdevice_list">
-              <rank>50</rank>
-            </item>
-            <item id="providercontracts_list">
-              <rank>60</rank>
-            </item>
-            <item id="services_list">
-              <rank>70</rank>
-            </item>
             <item id="col:col1">
-              <rank>80</rank>
               <items>
-                <item id="fieldset:Server:baseinfo">
-                  <rank>10</rank>
-                  <items>
-                    <item id="name">
-                      <rank>10</rank>
-                    </item>
-                    <item id="org_id">
-                      <rank>20</rank>
-                    </item>
-                    <item id="status">
-                      <rank>30</rank>
-                    </item>
-                    <item id="business_criticity">
-                     <rank>40</rank>
-                    </item>
-                    <item id="location_id">
-                      <rank>50</rank>
-                    </item>
-                  </items>
-                </item>
                 <item id="fieldset:Server:moreinfo">
-                  <rank>20</rank>
-                  <items>
-                    <item id="brand_id">
-                      <rank>10</rank>
-                    </item>
-                    <item id="model_id">
-                      <rank>20</rank>
-                    </item>
-                    <item id="osfamily_id">
-                      <rank>30</rank>
-                    </item>
-                    <item id="osversion_id">
-                      <rank>40</rank>
-                    </item>
-                    <item id="type">
-                      <rank>50</rank>
-                    </item>
+                  <items _delta="merge">
                     <item id="asset">
                       <rank>55</rank>
-                    </item>
-                    <item id="cpu">
-                      <rank>60</rank>
-                    </item>
-                    <item id="ram">
-                      <rank>70</rank>
-                    </item>
-                    <item id="managementip_id">
-                      <rank>80</rank>
                     </item>
                     <item id="powerconsumption">
                       <rank>85</rank>
                     </item>
-                    <item id="serialnumber">
-                      <rank>90</rank>
-                    </item>
-                    <item id="asset_number">
-                      <rank>100</rank>
-                    </item>
                     <item id="power_id">
-                      <rank>110</rank>
+                      <rank>115</rank>
                     </item>
                   </items>
                 </item>
               </items>
             </item>
             <item id="col:col2">
-              <rank>90</rank>
               <items>
-                <item id="fieldset:Server:Date">
-                  <rank>10</rank>
-                  <items>
-                    <item id="move2production">
-                      <rank>10</rank>
-                    </item>
-                    <item id="purchase_date">
-                      <rank>20</rank>
-                    </item>
-                    <item id="end_of_warranty">
-                      <rank>30</rank>
-                    </item>
-                  </items>
-                </item>
                 <item id="fieldset:Server:otherinfo">
-                  <rank>20</rank>
-                  <items>
-                    <item id="description">
-                      <rank>10</rank>
-                    </item>
+                  <items _delta="merge">
                     <item id="brandmon_id">
-                      <rank>20</rank>
+                      <rank>25</rank>
                     </item>
                     <item id="modelmon_id">
-                      <rank>30</rank>
+                      <rank>35</rank>
                     </item>
                     <item id="assetmon_number">
-                      <rank>40</rank>
+                      <rank>45</rank>
                     </item>
                   </items>
                 </item>

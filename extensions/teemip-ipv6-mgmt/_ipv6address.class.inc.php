@@ -198,7 +198,7 @@ class _IPv6Address extends IPAddress
 			$sPingBeforeAssign = utils::ReadPostedParam('attr_ping_before_assign', '');
 			if (empty($sPingBeforeAssign))
 			{
-				$sPingBeforeAssign = GetFromGlobalIPConfig('ping_before_assign', $sOrgId);
+				$sPingBeforeAssign = IPConfig::GetFromGlobalIPConfig('ping_before_assign', $sOrgId);
 			}
 			if ($sPingBeforeAssign =='ping_yes')
 			{
@@ -222,7 +222,7 @@ class _IPv6Address extends IPAddress
 	 */
 	public function GetAttributeFlags($sAttCode, &$aReasons = array(), $sTargetState = '')
 	{
-		if ((!$this->IsNew()) && ($sAttCode == 'ip'))
+		if ((!$this->IsNew()) && ($sAttCode == 'ip' || $sAttCode == 'subnet_id' || $sAttCode == 'range_id'))
 		{
 			return OPT_ATT_READONLY;
 		}

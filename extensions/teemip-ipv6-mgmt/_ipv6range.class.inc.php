@@ -532,6 +532,64 @@ EOF
 	}
 	
 	/**
+	 * Perform specific tasks related to IPv6 range creation:
+	 */	 
+	protected function AfterInsert()
+	{
+		parent::AfterInsert();
+		
+		$iOrgId = $this->Get('org_id');
+		$iId = $this->GetKey();
+		$sFirstIp = $this->Get('firstip')->ToString();
+		$sLastIp = $this->Get('lastip')->ToString();
+						
+		// Make sure all IPs belonging to range are attached to it
+			
+		$oIpRegisteredSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv6Address AS i WHERE :firstip <= i.ip AND i.ip <= :lastip AND i.org_id = $iOrgId",  array('firstip' => $sFirstIp, 'lastip' => $sLastIp)));
+		while ($oIpRegistered = $oIpRegisteredSet->Fetch())
+		{
+			if ($oIpRegistered->Get('range_id') != $iId)
+			{
+				$oIpRegistered->Set('range_id', $iId);
+				$oIpRegistered->DBUpdate();	
+			}
+		}
+	}
+	
+	/**
+	 * Perform specific tasks related to IPv6 range update:
+	 */	 
+	protected function AfterUpdate()
+	{
+		parent::AfterUpdate();
+		
+		$iOrgId = $this->Get('org_id');
+		$iId = $this->GetKey();
+		$sFirstIp = $this->Get('firstip')->ToString();
+		$sLastIp = $this->Get('lastip')->ToString();
+						
+		// Make sure all IPs belonging to range are attached to it
+			
+		$oIpRegisteredSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv6Address AS i WHERE :firstip <= i.ip AND i.ip <= :lastip AND i.org_id = $iOrgId",  array('firstip' => $sFirstIp, 'lastip' => $sLastIp)));
+		while ($oIpRegistered = $oIpRegisteredSet->Fetch())
+		{
+			if ($oIpRegistered->Get('range_id') != $iId)
+			{
+				$oIpRegistered->Set('range_id', $iId);
+				$oIpRegistered->DBUpdate();	
+			}
+		}
+
+		// Make sure all IPs ouside of range are NOT attached to it
+		$oIpRegisteredSet = new CMDBObjectSet(DBObjectSearch::FromOQL("SELECT IPv6Address AS i WHERE i.range_id = $iId AND (i.ip < :firstip OR :lastip < i.ip)",  array('firstip' => $sFirstIp, 'lastip' => $sLastIp)));
+		while ($oIpRegistered = $oIpRegisteredSet->Fetch())
+		{
+			$oIpRegistered->Set('range_id', 0);
+			$oIpRegistered->DBUpdate();
+		}		
+	}
+	
+	/**
 	 * Change flag of attributes that shouldn't be modified beside creation.
 	 */
 	public function GetAttributeFlags($sAttCode, &$aReasons = array(), $sTargetState = '')

@@ -100,6 +100,7 @@ Dict::Add('FR FR', 'French', 'Français', array(
 	'Class:WANLink:baseinfo' => 'Informations Générales',
 	'Class:WANLink:networkinfo' => 'Informations Réseau',
 	'Class:WANLink:admininfo' => 'Informations Administratives',
+	'Class:WANLink:locationinfo' => 'Sites',
 	'Class:WANLink:dateinfo' => 'Dates',
 	'Class:WANLink/Attribute:type_id' => 'Type',
 	'Class:WANLink/Attribute:type_id+' => '',
@@ -157,7 +158,7 @@ Dict::Add('FR FR', 'French', 'Français', array(
 // Class: WANType
 //
 
-Dict::Add('EN US', 'English', 'English', array(
+Dict::Add('FR FR', 'French', 'Français', array(
 	'Class:WANType' => 'Type du lien WAN',
 	'Class:WANType+' => '',
 	'Class:WANType/Attribute:description' => 'Description',

@@ -626,6 +626,7 @@
         <icon>images/ipv6address.png</icon>
         <reconciliation>
           <attributes>
+            <attribute id="fqdn"/>
             <attribute id="ip"/>
             <attribute id="org_id"/>
             <attribute id="org_name"/>
@@ -736,6 +737,9 @@
 		            <item id="fqdn">
 		              <rank>30</rank>
 		            </item>
+		            <item id="aliases">
+		              <rank>40</rank>
+		            </item>
                   </items>
                 </item>
                 <item id="fieldset:Class:IPAddress:ipinfo">
@@ -767,23 +771,26 @@
             <item id="fqdn">
               <rank>30</rank>
             </item>
+		    <item id="aliases">
+		      <rank>40</rank>
+		    </item>
             <item id="usage_id">
-              <rank>40</rank>
-            </item>
-            <item id="subnet_id">
               <rank>50</rank>
             </item>
-            <item id="org_id">
+            <item id="subnet_id">
               <rank>60</rank>
             </item>
-            <item id="requestor_id">
+            <item id="org_id">
               <rank>70</rank>
             </item>
+            <item id="requestor_id">
+              <rank>80</rank>
+            </item>
 		    <item id="allocation_date">
-		      <rank>80</rank>
+		      <rank>90</rank>
 		    </item>
             <item id="release_date">
-              <rank>90</rank>
+              <rank>100</rank>
             </item>
           </items>
         </search>
@@ -798,20 +805,23 @@
             <item id="fqdn">
               <rank>30</rank>
             </item>
+		    <item id="aliases">
+		      <rank>40</rank>
+		    </item>
             <item id="usage_id">
-              <rank>40</rank>
-            </item>
-            <item id="subnet_id">
               <rank>50</rank>
             </item>
-            <item id="org_id">
+            <item id="subnet_id">
               <rank>60</rank>
             </item>
+            <item id="org_id">
+              <rank>70</rank>
+            </item>
 		    <item id="allocation_date">
-		      <rank>70</rank>
+		      <rank>80</rank>
 		    </item>
             <item id="release_date">
-              <rank>80</rank>
+              <rank>90</rank>
             </item>
           </items>
         </list>

@@ -58,7 +58,7 @@ class _IPAddress extends IPObject
 		$sIpAllowDuplicateName = utils::ReadPostedParam('attr_ip_allow_duplicate_name', '');
 		if (empty($sIpAllowDuplicateName))
 		{
-			$sIpAllowDuplicateName = GetFromGlobalIPConfig('ip_allow_duplicate_name', $sOrgId);
+			$sIpAllowDuplicateName = IPConfig::GetFromGlobalIPConfig('ip_allow_duplicate_name', $sOrgId);
 		}
 		if ($sIpAllowDuplicateName == 'ipdup_no')
 		{
@@ -149,32 +149,85 @@ class _IPAddress extends IPObject
 				}
 				
 				// Tab for CIs using the IP
+				$iNbCIs = 0;
 				$oDatacenterDeviceSearch = DBObjectSearch::FromOQL("SELECT DatacenterDevice AS dd WHERE dd.managementip_id = $iKey");
 				$oDatacenterDeviceSet = new CMDBObjectSet($oDatacenterDeviceSearch);
 				$iNbDatacenterDevices = $oDatacenterDeviceSet->Count();
-
-				$oPCSearch = DBObjectSearch::FromOQL("SELECT PC AS pc WHERE pc.managementip_id = $iKey");
-				$oPCSet = new CMDBObjectSet($oPCSearch);
-				$iNbPCs = $oPCSet->Count();
-
-				$oPrinterSearch = DBObjectSearch::FromOQL("SELECT Printer AS pt WHERE pt.managementip_id = $iKey");
-				$oPrinterSet = new CMDBObjectSet($oPrinterSearch);
-				$iNbPrinters = $oPrinterSet->Count();
-
+				$iNbCIs += $iNbDatacenterDevices;
+				
+				$iNbVirtualMachines = 0;
 				if  (MetaModel::IsValidClass('VirtualMachine'))
 				{
 					$oVirtualMachineSearch = DBObjectSearch::FromOQL("SELECT VirtualMachine AS vm WHERE vm.managementip_id = $iKey");
 					$oVirtualMachineSet = new CMDBObjectSet($oVirtualMachineSearch);
 					$iNbVirtualMachines = $oVirtualMachineSet->Count();
+					$iNbCIs += $iNbVirtualMachines;
 				}
-				else
+
+				$iNbMobilePhones = 0;
+				if  (MetaModel::IsValidClass('MobilePhone'))
 				{
-					$iNbVirtualMachines = 0;
+					if (MetaModel::IsValidAttCode('MobilePhone', 'ipaddress_id'))
+					{
+					$oMobilePhoneSearch = DBObjectSearch::FromOQL("SELECT MobilePhone WHERE ipaddress_id = $iKey");
+					$oMobilePhoneSet = new CMDBObjectSet($oMobilePhoneSearch);
+					$iNbMobilePhones = $oMobilePhoneSet->Count();
+					$iNbCIs += $iNbMobilePhones;
+					}
+				}
+
+				$iNbIPPhones = 0;
+				if  (MetaModel::IsValidClass('IPPhone'))
+				{
+					if (MetaModel::IsValidAttCode('IPPhone', 'ipaddress_id'))
+					{
+					$oIPPhoneSearch = DBObjectSearch::FromOQL("SELECT IPPhone WHERE ipaddress_id = $iKey");
+					$oIPPhoneSet = new CMDBObjectSet($oIPPhoneSearch);
+					$iNbIPPhones = $oIPPhoneSet->Count();
+					$iNbCIs += $iNbIPPhones;
+					}
+				}
+
+				$iNbTablets = 0;
+				if  (MetaModel::IsValidClass('Tablet'))
+				{
+					if (MetaModel::IsValidAttCode('Tablet', 'ipaddress_id'))
+					{
+					$oTabletSearch = DBObjectSearch::FromOQL("SELECT Tablet WHERE ipaddress_id = $iKey");
+					$oTabletSet = new CMDBObjectSet($oTabletSearch);
+					$iNbTablets = $oTabletSet->Count();
+					$iNbCIs += $iNbTablets;
+					}
+				}
+
+				$iNbPCs = 0;
+				if  (MetaModel::IsValidClass('PC'))
+				{
+					if (MetaModel::IsValidAttCode('PC', 'ipaddress_id'))
+					{
+					$oPCSearch = DBObjectSearch::FromOQL("SELECT PC WHERE ipaddress_id = $iKey");
+					$oPCSet = new CMDBObjectSet($oPCSearch);
+					$iNbPCs = $oPCSet->Count();
+					$iNbCIs += $iNbPCs;
+					}
+				}
+
+				$iNbPrinters = 0;
+				if  (MetaModel::IsValidClass('Printer'))
+				{
+					if (MetaModel::IsValidAttCode('Printer', 'ipaddress_id'))
+					{
+					$oPrinterSearch = DBObjectSearch::FromOQL("SELECT Printer WHERE ipaddress_id = $iKey");
+					$oPrinterSet = new CMDBObjectSet($oPrinterSearch);
+					$iNbPrinters = $oPrinterSet->Count();
+					$iNbCIs += $iNbPrinters;
+					}
 				}
 
 				$oIPInterfaceToIPAddressSearch = DBObjectSearch::FromOQL("SELECT lnkIPInterfaceToIPAddress AS l WHERE l.ipaddress_id = $iKey");
 				$oIPInterfaceToIPAddressSet = new CMDBObjectSet($oIPInterfaceToIPAddressSearch);
 				$iNbIPInterfaces = $oIPInterfaceToIPAddressSet->Count();
+				$iNbCIs += $iNbIPInterfaces;
 				$oIPInterfaceSet = array();
 				while ($oLnk = $oIPInterfaceToIPAddressSet->fetch())
 				{
@@ -182,42 +235,48 @@ class _IPAddress extends IPObject
 					$oIPInterfaceSet[] = MetaModel::GetObject('IPInterface', $iIpIntKey, false);
 				}
 				$oSet = CMDBObjectSet::FromArray('IPInterface', $oIPInterfaceSet);
-
-				$iNbCIs = $iNbDatacenterDevices + $iNbPCs + $iNbPrinters + $iNbVirtualMachines + $iNbIPInterfaces;
 				
 				$oPage->SetCurrentTab(Dict::Format('Class:IPAddress/Tab:ci_list', $iNbCIs));
 				if ($iNbCIs != 0)
 				{
+					$oPage->p(MetaModel::GetClassIcon('FunctionalCI').'&nbsp;'.Dict::Format('Class:IPAddress/Tab:ci_list+', $iNbCIs));
 					if ($iNbDatacenterDevices != 0)
 					{
-						$oPage->p(MetaModel::GetClassIcon('DatacenterDevice').'&nbsp;'.Dict::Format('Class:IPAddress/Tab:DatacenterDevice+', $iNbDatacenterDevices));
 						$oBlock = DisplayBlock::FromObjectSet($oDatacenterDeviceSet, 'list');
 						$oBlock->Display($oPage, 'dd_id', array('menu' => false));
 					}
-
-					if ($iNbPCs != 0)
-					{
-						$oPage->p(MetaModel::GetClassIcon('PC').'&nbsp;'.Dict::Format('Class:IPAddress/Tab:PC+', $iNbPCs));
-						$oBlock = DisplayBlock::FromObjectSet($oPCSet, 'list');
-						$oBlock->Display($oPage, 'dd_id', array('menu' => false));
-					}
-
-					if ($iNbPrinters != 0)
-					{
-						$oPage->p(MetaModel::GetClassIcon('Printer').'&nbsp;'.Dict::Format('Class:IPAddress/Tab:Printer+', $iNbPrinters));
-						$oBlock = DisplayBlock::FromObjectSet($oPrinterSet, 'list');
-						$oBlock->Display($oPage, 'dd_id', array('menu' => false));
-					}
-
 					if ($iNbVirtualMachines != 0)
 					{
-						$oPage->p(MetaModel::GetClassIcon('VirtualMachine').'&nbsp;'.Dict::Format('Class:IPAddress/Tab:VirtualMachine+', $iNbVirtualMachines));
 						$oBlock = DisplayBlock::FromObjectSet($oVirtualMachineSet, 'list');
 						$oBlock->Display($oPage, 'vm_id', array('menu' => false));
 					}
+					if ($iNbMobilePhones != 0)
+					{
+						$oBlock = DisplayBlock::FromObjectSet($oMobilePhoneSet, 'list');
+						$oBlock->Display($oPage, 'mp_id', array('menu' => false));
+					}
+					if ($iNbIPPhones != 0)
+					{
+						$oBlock = DisplayBlock::FromObjectSet($oIPPhoneSet, 'list');
+						$oBlock->Display($oPage, 'ip_id', array('menu' => false));
+					}
+					if ($iNbTablets != 0)
+					{
+						$oBlock = DisplayBlock::FromObjectSet($oTabletSet, 'list');
+						$oBlock->Display($oPage, 'tb_id', array('menu' => false));
+					}
+					if ($iNbPCs != 0)
+					{
+						$oBlock = DisplayBlock::FromObjectSet($oPCSet, 'list');
+						$oBlock->Display($oPage, 'pc_id', array('menu' => false));
+					}
+					if ($iNbPrinters != 0)
+					{
+						$oBlock = DisplayBlock::FromObjectSet($oPrinterSet, 'list');
+						$oBlock->Display($oPage, 'pr_id', array('menu' => false));
+					}
 					if ($iNbIPInterfaces != 0)
 					{
-						$oPage->p(MetaModel::GetClassIcon('IPInterface').'&nbsp;'.Dict::Format('Class:IPAddress/Tab:IPInterface+', $iNbIPInterfaces));
 						$oBlock = DisplayBlock::FromObjectSet($oSet, 'list');
 						$oBlock->Display($oPage, 'ii_id', array('menu' => false));
 					}
@@ -302,4 +361,58 @@ class _IPAddress extends IPObject
 		}
 		return parent::GetAttributeFlags($sAttCode, $aReasons, $sTargetState);
 	}
+	
+	/**
+	 * Manage status of IP when attached to a device 
+	 */					   
+	public static function SetStatusOnAttachment ($iIpId = null, $iPreviousIpId = null)
+	{
+		if ($iIpId != $iPreviousIpId) 
+		{
+			if ($iIpId != null)
+			{
+				$oIP = MetaModel::GetObject('IPAddress', $iIpId, false /* MustBeFound */);
+				if ($oIP != null)
+				{
+					if ($oIP->Get('status') != 'allocated')
+					{
+						$oIP->Set('status', 'allocated');	
+						$oIP->DBUpdate();
+					}
+				}
+			}
+			if ($iPreviousIpId != null)
+			{
+				$oIP = MetaModel::GetObject('IPAddress', $iPreviousIpId, false /* MustBeFound */);
+				if ($oIP != null)
+				{
+					if ($oIP->Get('status') == 'allocated')
+					{
+						$oIP->Set('status', 'unassigned');	
+						$oIP->DBUpdate();
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Manage status of IP when deattached from a device 
+	 */
+	public static function SetStatusOnDetachment ($iIpId = null)
+	{
+		if ($iIpId != null)
+		{
+			$oIP = MetaModel::GetObject('IPAddress', $iIpId, false /* MustBeFound */);
+			if ($oIP != null)
+			{
+				if ($oIP->Get('status') == 'allocated')
+				{
+					$oIP->Set('status', 'unassigned');
+					$oIP->DBUpdate();
+				}
+			}
+		}
+	}
+	
 }

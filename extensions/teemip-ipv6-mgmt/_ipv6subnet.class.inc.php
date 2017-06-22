@@ -994,7 +994,7 @@ EOF
 
 		// Set Gateway IP
 		$sOrgId = $this->Get('org_id');
-		$sGatewayIPFormat = GetFromGlobalIPConfig('ipv6_gateway_ip_format', $sOrgId);
+		$sGatewayIPFormat = IPConfig::GetFromGlobalIPConfig('ipv6_gateway_ip_format', $sOrgId);
 		switch ($sGatewayIPFormat)
 		{
 			case 'subnetip_plus_1':
@@ -1103,7 +1103,7 @@ EOF
 		}
 		
 		// If allocation of Gateway Ip is free, make sure it is contained in subnet
-		$sGatewayIPFormat = GetFromGlobalIPConfig('ipv6_gateway_ip_format', $sOrgId);
+		$sGatewayIPFormat = IPConfig::GetFromGlobalIPConfig('ipv6_gateway_ip_format', $sOrgId);
 		if ($sGatewayIPFormat == 'free_setup')
 		{
 			$oGatewayIp = $this->Get('gatewayip');
@@ -1134,12 +1134,12 @@ EOF
 		$sReserveSubnetIPs = utils::ReadPostedParam('attr_reserve_subnet_IPs', '');
 		if (empty($sReserveSubnetIPs))
 		{
-			$sReserveSubnetIPs = GetFromGlobalIPConfig('reserve_subnet_IPs', $sOrgId);
+			$sReserveSubnetIPs = IPConfig::GetFromGlobalIPConfig('reserve_subnet_IPs', $sOrgId);
 		}
 		if ($sReserveSubnetIPs == 'reserve_yes')
 		{
 			// Create or update subnet IP
-			$sUsageNetworkIpId = GetIpUsageId($sOrgId, NETWORK_IP_CODE);
+			$sUsageNetworkIpId = IPUsage::GetIpUsageId($sOrgId, NETWORK_IP_CODE);
 			$oIp = MetaModel::GetObjectFromOQL("SELECT IPv6Address AS i WHERE i.ip = '$sSubnetIp' AND i.org_id = $sOrgId", null, false);
 			if (is_null($oIp))
 			{
@@ -1163,7 +1163,7 @@ EOF
 			}
 			
 			// Create or update gateway IP
-			$sUsageGatewayIpId = GetIpUsageId($sOrgId, GATEWAY_IP_CODE);
+			$sUsageGatewayIpId = IPUsage::GetIpUsageId($sOrgId, GATEWAY_IP_CODE);
 			$oIp = MetaModel::GetObjectFromOQL("SELECT IPv6Address AS i WHERE i.ip = '$sGatewayIp' AND i.org_id = $sOrgId", null, false);
 			if (is_null($oIp))
 			{
@@ -1213,12 +1213,12 @@ EOF
 		$oGatewayIp = $this->Get('gatewayip');
 		$sGatewayIp = $oGatewayIp->ToString();
 		$sLastIp = $this->Get('lastip')->ToString();
-		$sReserveSubnetIPs = GetFromGlobalIPConfig('reserve_subnet_IPs', $sOrgId);
+		$sReserveSubnetIPs = IPConfig::GetFromGlobalIPConfig('reserve_subnet_IPs', $sOrgId);
 		
 		if ($sReserveSubnetIPs == 'reserve_yes')
 		{
 			// Create or update subnet IP
-			$sUsageNetworkIpId = GetIpUsageId($sOrgId, NETWORK_IP_CODE);
+			$sUsageNetworkIpId = IPUsage::GetIpUsageId($sOrgId, NETWORK_IP_CODE);
 			$oIp = MetaModel::GetObjectFromOQL("SELECT IPv6Address AS i WHERE i.ip = '$sSubnetIp' AND i.org_id = $sOrgId", null, false);
 			if (is_null($oIp))
 			{
@@ -1242,7 +1242,7 @@ EOF
 			}
 			
 			// Create or update gateway IP
-			$sUsageGatewayIpId = GetIpUsageId($sOrgId, GATEWAY_IP_CODE);
+			$sUsageGatewayIpId = IPUsage::GetIpUsageId($sOrgId, GATEWAY_IP_CODE);
 			$oIp = MetaModel::GetObjectFromOQL("SELECT IPv6Address AS i WHERE i.ip = '$sGatewayIp' AND i.org_id = $sOrgId", null, false);
 			if (is_null($oIp))
 			{
@@ -1308,9 +1308,18 @@ EOF
 	 */
 	public function GetAttributeFlags($sAttCode, &$aReasons = array(), $sTargetState = '')
 	{
-		if ((!$this->IsNew()) && (($sAttCode == 'org_id') || ($sAttCode == 'block_id') || ($sAttCode == 'ip') || ($sAttCode == 'mask') || ($sAttCode == 'gatewayip') || ($sAttCode == 'lastip') || ($sAttCode == 'ip_occupancy') || ($sAttCode == 'range_occupancy')))
+		if ((!$this->IsNew()) && (($sAttCode == 'org_id') || ($sAttCode == 'block_id') || ($sAttCode == 'ip') || ($sAttCode == 'mask') || ($sAttCode == 'lastip') || ($sAttCode == 'ip_occupancy') || ($sAttCode == 'range_occupancy')))
 		{
 			return OPT_ATT_READONLY;
+		}
+		if ((!$this->IsNew()) && ($sAttCode == 'gatewayip'))
+		{
+			$sOrgId = $this->Get('org_id');
+			$sGatewayIPFormat = IPConfig::GetFromGlobalIPConfig('ipv6_gateway_ip_format', $sOrgId);
+			if ($sGatewayIPFormat != 'free_setup')
+			{
+				return OPT_ATT_READONLY;
+			}
 		}
 		return parent::GetAttributeFlags($sAttCode, $aReasons, $sTargetState);
 	}

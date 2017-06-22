@@ -47,7 +47,39 @@
           <is_null_allowed>true</is_null_allowed>
         </field>
       </fields>
-      <methods/>
+      <methods>
+        <method id="ComputeFqdn">
+          <static>true</static>
+          <access>public</access>
+          <type>Internal</type>
+          <code><![CDATA[ public static function ComputeFqdn($sName, $sZoneName)
+	{
+		// Note: $sZoneName attribut must be fully qualified
+
+		$l = strlen($sZoneName);
+		if (substr($sName, - 1) == '.')
+		{
+			if (substr_compare($sName, $sZoneName, - $l, $l) != 0)
+			{
+				$sName = $sName.$sZoneName;
+			}
+		}
+		else
+		{
+			if (substr_compare($sName, $sZoneName, - $l + 1, $l - 1) != 0)
+			{
+				$sName = $sName.'.'.$sZoneName;			
+			}
+			else
+			{
+				$sName = $sName.'.';			
+			}
+		}
+		return $sName;
+
+	}]]></code>
+        </method>
+      </methods>
       <presentation/>
     </class>
     <class id="Domain" _delta="define">
@@ -285,9 +317,10 @@
           <is_null_allowed>false</is_null_allowed>
         </field>
         <field id="location_id1" xsi:type="AttributeExternalKey">
-          <filter><![CDATA[SELECT l FROM Organization AS child JOIN Organization AS root ON child.parent_id BELOW root.id JOIN Location AS l ON l.org_id=root.id WHERE child.id=:this->org_id]]></filter>
+          <filter><![CDATA[SELECT l FROM Organization AS child JOIN Organization AS root ON child.parent_id BELOW root.id JOIN Location AS l ON l.org_id=root.id WHERE (child.id=:this->org_id OR child.id=:this->carrier_id)]]></filter>
           <dependencies>
             <attribute id="org_id"/>
+            <attribute id="carrier_id"/>
           </dependencies>
           <sql>location_id1</sql>
           <target_class>Location</target_class>
@@ -299,9 +332,10 @@
           <target_attcode>name</target_attcode>
         </field>
         <field id="location_id2" xsi:type="AttributeExternalKey">
-          <filter><![CDATA[SELECT l FROM Organization AS child JOIN Organization AS root ON child.parent_id BELOW root.id JOIN Location AS l ON l.org_id=root.id WHERE child.id=:this->org_id]]></filter>
+          <filter><![CDATA[SELECT l FROM Organization AS child JOIN Organization AS root ON child.parent_id BELOW root.id JOIN Location AS l ON l.org_id=root.id WHERE (child.id=:this->org_id OR child.id=:this->carrier_id)]]></filter>
           <dependencies>
             <attribute id="org_id"/>
+            <attribute id="carrier_id"/>
           </dependencies>
           <sql>location_id2</sql>
           <target_class>Location</target_class>
@@ -418,11 +452,35 @@
 		            <item id="status">
 		              <rank>40</rank>
 		            </item>
+                  </items>
+                </item>
+                <item id="fieldset:Class:WANLink:admininfo">
+                  <rank>20</rank>
+                  <items>
+		            <item id="carrier_id">
+		              <rank>10</rank>
+		            </item>
+		            <item id="carrier_reference">
+		              <rank>20</rank>
+		            </item>
+		            <item id="internal_reference">
+		              <rank>30</rank>
+		            </item>
+                  </items>
+                </item>
+              </items>
+            </item>
+            <item id="col:col2">
+              <rank>20</rank>
+              <items>
+                 <item id="fieldset:Class:WANLink:locationinfo">
+                  <rank>10</rank>
+                  <items>
 		            <item id="location_id1">
-		              <rank>50</rank>
+		              <rank>10</rank>
 		            </item>
 		            <item id="location_id2">
-		              <rank>60</rank>
+		              <rank>20</rank>
 		            </item>
                   </items>
                 </item>
@@ -451,25 +509,11 @@
                 </item>
               </items>
             </item>
-            <item id="col:col2">
-              <rank>20</rank>
+            <item id="col:col3">
+              <rank>10</rank>
               <items>
-                <item id="fieldset:Class:WANLink:admininfo">
-                  <rank>10</rank>
-                  <items>
-		            <item id="carrier_id">
-		              <rank>10</rank>
-		            </item>
-		            <item id="carrier_reference">
-		              <rank>20</rank>
-		            </item>
-		            <item id="internal_reference">
-		              <rank>30</rank>
-		            </item>
-                  </items>
-                </item>
                 <item id="fieldset:Class:WANLink:dateinfo">
-                  <rank>10</rank>
+                  <rank>30</rank>
                   <items>
 		            <item id="purchase_date">
 		              <rank>30</rank>

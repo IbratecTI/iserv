@@ -1,7 +1,7 @@
 <?php
 SetupWebPage::AddModule(
 	__FILE__, // Path to the current file, all other file names are relative to the directory containing this file
-	'teemip-ip-mgmt/2.0.2',
+	'teemip-ip-mgmt/2.1.0',
 	array(
 		// Identification
 		//
